@@ -61,6 +61,16 @@ class MenuScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown-ENTER', () => this.startGame());
     this.tweens.add({ targets: play, alpha: 0.55, duration: 700, yoyo: true, repeat: -1 });
+
+    // Attract mode: 30s of menu idle starts a pilot demo; any activity resets.
+    const armIdle = () => {
+      if (this.idleEvent) this.idleEvent.remove();
+      this.idleEvent = this.time.delayedCall(30000, () => this.scene.start('Game', { demo: true }));
+    };
+    armIdle();
+    this.input.keyboard.on('keydown', armIdle);
+    this.input.on('pointerdown', armIdle);
+    this.input.on('pointermove', armIdle);
   }
 
   startGame() {

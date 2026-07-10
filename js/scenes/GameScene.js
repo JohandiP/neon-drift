@@ -5,10 +5,23 @@ class GameScene extends Phaser.Scene {
     makeTextures(this);
     this.themeIndex = -1; // startWave draws the arena theme
 
-    this.save = SaveManager.load();
+    // Attract-mode demo: rookie pilot, random ship, no upgrades — and it
+    // must never write to the real save.
+    this.demoMode = !!(data && data.demo);
+    this.exiting = false;
+    if (this.demoMode) {
+      this.save = SaveManager.defaults();
+      const shipKeys = Object.keys(SHIPS);
+      this.save.selectedShip = shipKeys[Math.floor(Math.random() * shipKeys.length)];
+      this.demoAim = { x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2 };
+      this.pilotState = Pilot.makeState();
+      this.demoEndsAt = 0; // set on first update
+    } else {
+      this.save = SaveManager.load();
+    }
     this.runStartHigh = this.save.highScore;
     this.stats = playerStats(this.save);
-    const resume = (data && data.resume && this.save.pendingRun) ? this.save.pendingRun : null;
+    const resume = (!this.demoMode && data && data.resume && this.save.pendingRun) ? this.save.pendingRun : null;
 
     // Run state (restored from the wave-start checkpoint when resuming)
     this.score = resume ? resume.score : 0;
@@ -77,15 +90,25 @@ class GameScene extends Phaser.Scene {
     // Pause on ESC or P. The shop no longer relies on the scene 'resume' event
     // (it calls onShopClosed directly), so resuming from pause is side-effect free.
     const doPause = () => {
-      if (this.gameEnded) return;
+      if (this.gameEnded || this.demoMode) return;
       this.scene.launch('Pause');
       this.scene.pause();
     };
     kb.on('keydown-ESC', doPause);
     kb.on('keydown-P', doPause);
 
+    if (this.demoMode) {
+      // Any real input hands control back to the menu.
+      const exit = () => this.exitDemo();
+      kb.on('keydown', exit);
+      this.input.on('pointerdown', exit);
+      const badge = neonText(this, GAME_WIDTH / 2, 120, 'DEMO', 40, '#ff2d78').setOrigin(0.5).setDepth(30);
+      this.tweens.add({ targets: badge, alpha: 0.25, duration: 650, yoyo: true, repeat: -1 });
+      neonText(this, GAME_WIDTH / 2, 158, 'press any key or click to return', 15, '#8899bb').setOrigin(0.5).setDepth(30);
+    }
+
     this.createHUD();
-    this.startWave(resume ? resume.wave : 1);
+    this.startWave(this.demoMode ? 6 + Math.floor(Math.random() * 8) : (resume ? resume.wave : 1));
   }
 
   // ---------- HUD ----------
@@ -145,14 +168,16 @@ class GameScene extends Phaser.Scene {
     }
     // Checkpoint: quitting to menu (or closing the game) resumes by restarting
     // this wave with the values it began with — mid-wave gains roll back.
-    this.save.pendingRun = {
-      wave: n,
-      score: this.score,
-      hull: this.hull,
-      coresEarned: this.coresEarned,
-      totalCores: this.save.totalCores,
-    };
-    SaveManager.save(this.save);
+    if (!this.demoMode) {
+      this.save.pendingRun = {
+        wave: n,
+        score: this.score,
+        hull: this.hull,
+        coresEarned: this.coresEarned,
+        totalCores: this.save.totalCores,
+      };
+      SaveManager.save(this.save);
+    }
     const count = n + 2;
     this.spawnRemaining = count;
     this.showBanner(n % WAVES.bossEveryNWaves === 0 ? `WAVE ${n} — BOSS` : `WAVE ${n}`);
@@ -237,6 +262,7 @@ class GameScene extends Phaser.Scene {
     this.updateHUD();
     this.time.delayedCall(1100, () => {
       if (this.gameEnded) return;
+      if (this.demoMode) { this.startWave(this.wave + 1); return; } // no shop in demos
       // Persist here, not earlier: cores still flying to the player during the
       // banner are collected by now, and the shop reads cores from the save.
       this.persistProgress();
@@ -258,9 +284,15 @@ class GameScene extends Phaser.Scene {
 
   // ---------- Combat ----------
 
-  fireBullet(time) {
+  aimTarget() {
+    if (this.demoMode) return this.demoAim;
     const p = this.input.activePointer;
-    const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, p.worldX, p.worldY);
+    return { x: p.worldX, y: p.worldY };
+  }
+
+  fireBullet(time) {
+    const aim = this.aimTarget();
+    const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y);
     const b = this.bullets.get(this.player.x, this.player.y);
     if (!b) return;
     b.setActive(true).setVisible(true);
@@ -420,6 +452,7 @@ class GameScene extends Phaser.Scene {
     this.persistProgress();
 
     this.time.delayedCall(1200, () => {
+      if (this.demoMode) { this.scene.start('Menu'); return; }
       this.scene.start('GameOver', {
         score: this.score,
         wave: this.wave,
@@ -430,7 +463,14 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  exitDemo() {
+    if (this.exiting) return;
+    this.exiting = true;
+    this.scene.start('Menu');
+  }
+
   persistProgress() {
+    if (this.demoMode) return;
     this.save.highScore = Math.max(this.save.highScore, this.score);
     this.save.bestWave = Math.max(this.save.bestWave, this.wave);
     SaveManager.save(this.save);
@@ -480,6 +520,13 @@ class GameScene extends Phaser.Scene {
     const dt = delta / 1000;
     const k = this.keys;
 
+    // Attract mode: the rookie pilot flies; a stale demo self-terminates.
+    if (this.demoMode) {
+      if (!this.demoEndsAt) this.demoEndsAt = time + 60000;
+      if (time > this.demoEndsAt) { this.exitDemo(); return; }
+      Pilot.update(this, time, this.demoCfg || PILOT_ROOKIE, this.pilotState);
+    }
+
     // Movement (acceleration-based, design doc §3)
     let ax = 0, ay = 0;
     if (k.left.isDown || k.left2.isDown) ax -= 1;
@@ -513,9 +560,9 @@ class GameScene extends Phaser.Scene {
     }
     this.player.setAlpha(time < this.invulnUntil ? 0.5 : (drifting ? 0.85 : 1));
 
-    // Aim at mouse
-    const p = this.input.activePointer;
-    this.player.setRotation(Phaser.Math.Angle.Between(this.player.x, this.player.y, p.worldX, p.worldY));
+    // Aim at the mouse (or the pilot's virtual cursor in demo mode)
+    const aim = this.aimTarget();
+    this.player.setRotation(Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y));
 
     // Dash
     if (Phaser.Input.Keyboard.JustDown(k.dash) && time >= this.dashReadyAt) {
