@@ -27,8 +27,12 @@ class GameScene extends Phaser.Scene {
 
     // Player
     this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'ship_' + this.save.selectedShip);
-    this.player.setDrag(PLAYER.drag).setMaxVelocity(this.stats.maxSpeed).setCollideWorldBounds(true);
+    this.player.setDrag(PLAYER.drag).setCollideWorldBounds(true);
+    // Clamp the velocity VECTOR, not per-axis (setMaxVelocity) — per-axis
+    // clamping let diagonal movement run 41% over the design speed.
+    this.player.body.setMaxSpeed(this.stats.maxSpeed);
     this.player.body.setCircle(14, 6, 1);
+    this.dashBoostUntil = 0;
 
     // Groups (pooled)
     this.bullets = this.physics.add.group({ defaultKey: 'bullet', maxSize: 120 });
@@ -446,6 +450,7 @@ class GameScene extends Phaser.Scene {
   shiftTimers(gap) {
     this.invulnUntil += gap;
     this.dashReadyAt += gap;
+    this.dashBoostUntil += gap;
     if (isFinite(this.nextFireAt)) this.nextFireAt += gap;
     this.droneNextFire += gap;
     Object.keys(this.activeBuffs).forEach(k => { this.activeBuffs[k] += gap; });
@@ -487,7 +492,10 @@ class GameScene extends Phaser.Scene {
     // Drift: lower drag, higher top speed, builds multiplier near enemies
     const drifting = k.drift.isDown;
     this.player.setDrag(drifting ? PLAYER.driftDrag : PLAYER.drag);
-    this.player.setMaxVelocity(drifting ? this.stats.driftMaxSpeed : this.stats.maxSpeed);
+    // Speed cap by state: dash burst > drift > normal.
+    this.player.body.maxSpeed = time < this.dashBoostUntil
+      ? PLAYER.dashSpeed
+      : (drifting ? this.stats.driftMaxSpeed : this.stats.maxSpeed);
 
     if (drifting && this.multiplier < PLAYER.maxMultiplier) {
       const near = this.enemies.getChildren().some(e =>
@@ -513,6 +521,8 @@ class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(k.dash) && time >= this.dashReadyAt) {
       this.dashReadyAt = time + this.stats.dashCooldown * 1000;
       this.invulnUntil = Math.max(this.invulnUntil, time + this.stats.dashInvulnMs);
+      this.dashBoostUntil = time + this.stats.dashInvulnMs;
+      this.player.body.maxSpeed = PLAYER.dashSpeed; // raise cap NOW, not next frame
       const v = this.player.body.velocity;
       const dashAngle = (v.length() > 20) ? v.angle() : this.player.rotation;
       this.physics.velocityFromRotation(dashAngle, PLAYER.dashSpeed, this.player.body.velocity);
