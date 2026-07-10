@@ -186,13 +186,15 @@ class GameScene extends Phaser.Scene {
     if (n >= WAVES.shooterUnlockWave) pool.push('shooter');
     if (n >= WAVES.splitterUnlockWave) pool.push('splitter');
 
-    for (let i = 0; i < count; i++) {
-      this.time.delayedCall(400 + i * 350, () => {
+    // One repeating timer for the whole wave instead of one event per enemy.
+    this.time.addEvent({
+      delay: 350, repeat: count - 1,
+      callback: () => {
         if (this.gameEnded) return;
         this.spawnEnemy(Phaser.Utils.Array.GetRandom(pool));
         this.spawnRemaining--;
-      });
-    }
+      },
+    });
     if (n % WAVES.bossEveryNWaves === 0) {
       this.spawnRemaining++;
       this.time.delayedCall(1200, () => {
@@ -223,7 +225,19 @@ class GameScene extends Phaser.Scene {
       bcfg = BOSSES[bossKind];
     }
     const pos = (x === undefined) ? this.edgeSpawnPoint() : { x, y };
-    const e = this.enemies.create(pos.x, pos.y, bcfg ? bcfg.tex : type);
+    // Pooled: reuse a dead enemy sprite (and its body) instead of allocating.
+    const e = this.enemies.get(pos.x, pos.y);
+    if (!e) return null;
+    e.setTexture(bcfg ? bcfg.tex : type);
+    e.setActive(true).setVisible(true);
+    e.clearTint();
+    e.setAlpha(1);
+    e.body.reset(pos.x, pos.y);
+    e.body.enable = true;
+    e.flashUntil = 0;
+    e.nextChargeAt = 0;
+    e.chargingUntil = 0;
+    e.nextSpawnAt = 0;
     e.enemyType = type;
     e.bossKind = bossKind;
     e.hp = bcfg ? bcfg.hp + (this.wave - 1) * 30 : cfg.hp;
@@ -327,7 +341,7 @@ class GameScene extends Phaser.Scene {
     this.killProjectile(bullet);
     enemy.hp -= bullet.damage || PLAYER.bulletDamage;
     enemy.setTintFill(0xffffff);
-    this.time.delayedCall(60, () => { if (enemy.active) enemy.clearTint(); });
+    enemy.flashUntil = this.time.now + 60; // cleared in update — no timer alloc per hit
     if (enemy.hp <= 0) this.killEnemy(enemy);
   }
 
@@ -356,7 +370,10 @@ class GameScene extends Phaser.Scene {
       c.body.setVelocity(Phaser.Math.Between(-60, 60), Phaser.Math.Between(-60, 60));
     }
     if (enemy.enemyType === 'boss' || Math.random() < BUFF_DROP_CHANCE) this.spawnBuff(x, y);
-    enemy.destroy();
+    // Back to the pool, not destroyed — the sprite is reused by later spawns.
+    enemy.setActive(false).setVisible(false);
+    enemy.body.stop();
+    enemy.body.enable = false;
     this.updateHUD();
     this.checkWaveClear();
   }
@@ -411,7 +428,7 @@ class GameScene extends Phaser.Scene {
     if (this.damagePlayer(enemy.damage)) {
       enemy.hp -= PLAYER.ramDamage;
       enemy.setTintFill(0xffffff);
-      this.time.delayedCall(60, () => { if (enemy.active) enemy.clearTint(); });
+      enemy.flashUntil = this.time.now + 60;
       if (enemy.active && enemy.hp <= 0) this.killEnemy(enemy);
     }
   }
@@ -667,6 +684,7 @@ class GameScene extends Phaser.Scene {
     // Enemy AI
     const activeEnemies = this.enemies.getChildren().filter(e => e.active);
     activeEnemies.forEach(e => {
+      if (e.flashUntil && time > e.flashUntil) { e.clearTint(); e.flashUntil = 0; }
       const dist = Phaser.Math.Distance.Between(e.x, e.y, this.player.x, this.player.y);
       const toPlayer = Phaser.Math.Angle.Between(e.x, e.y, this.player.x, this.player.y);
       const wander = Math.sin((time / 1000) * e.wanderFreq + e.wanderPhase) * e.wanderAmp;
