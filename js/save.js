@@ -7,7 +7,9 @@ const SaveManager = {
       highScore: 0,
       bestWave: 0,
       totalCores: 0,
-      upgrades: { fireRate: 0, hull: 0, dashCooldown: 0, magnet: 0 },
+      upgrades: { fireRate: 0, hull: 0, dashCooldown: 0, magnet: 0, damage: 0, drift: 0 },
+      selectedShip: 'viper',
+      unlockedShips: ['viper'],
       controls: JSON.parse(JSON.stringify(DEFAULT_CONTROLS)),
       // Wave-start checkpoint of the current run; null when no run to resume.
       pendingRun: null,
@@ -22,6 +24,10 @@ const SaveManager = {
       const merged = Object.assign(this.defaults(), data);
       merged.upgrades = Object.assign(this.defaults().upgrades, data.upgrades || {});
       merged.controls = Object.assign(this.defaults().controls, data.controls || {});
+      if (!Array.isArray(merged.unlockedShips) || !merged.unlockedShips.length) {
+        merged.unlockedShips = ['viper'];
+      }
+      if (!SHIPS[merged.selectedShip]) merged.selectedShip = 'viper';
       return merged;
     } catch (e) {
       return this.defaults();

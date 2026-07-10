@@ -16,10 +16,12 @@ step, no dependencies to fetch (Phaser 3.87 is bundled in `lib/`).
 - **Dash** — SHIFT, brief invulnerability
 - **Pause** — ESC or P
 
-Every kill scores 100 × your multiplier. Enemies drop **cores** — spend them in
-the between-wave shop on permanent upgrades (fire rate, hull, dash cooldown,
-core magnet). Some enemies drop timed **buffs**: regen, shield, big shot, rapid
-fire, and an assist drone on boss waves. A boss appears every 5th wave.
+Every kill scores 100 × your multiplier. Enemies drop **cores** — spend them
+in the between-wave shop on six permanent upgrade tracks, or in the **garage**
+on one of five ships with distinct stat profiles. Some enemies drop timed
+**buffs**: regen, shield, big shot, rapid fire, and an assist drone on boss
+waves. Three boss kinds rotate every 5th wave, and the arena theme shifts
+every 10 waves.
 
 Progress (high score, cores, upgrades, key bindings) saves to `localStorage`.
 Quitting mid-run leaves a checkpoint — resume from the menu and the wave

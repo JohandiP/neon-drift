@@ -46,10 +46,19 @@ can't be used as a weapon.
 | Enemy | HP | Speed | Contact dmg | Cores | Behavior |
 |---|---|---|---|---|---|
 | Chaser | 20 | 140 | 10 | 1 | Homes straight at you |
-| Mini | 10 | 185 | 6 | 0 | Fast fragment from a splitter |
+| Mini | 10 | 185 | 6 | 0 | Fast fragment from a splitter (or hive boss) |
 | Shooter | 30 | 110 | 8 | 2 | Holds ~250px range, fires 8-dmg bullets every 2s |
 | Splitter | 40 | 90 | 12 | 2 | Splits into two minis on death |
-| Boss | 300 (+30/wave) | 60 | 20 | 10 | Every 5th wave; radial 12-bullet bursts every 3s |
+| Boss | see below | | 20 | 10 | Every 5th wave; three kinds rotate |
+
+Three bosses rotate (wave 5 → Warden, 10 → Lancer, 15 → Hive, 20 → Warden…),
+all gaining +30 HP per wave:
+
+| Boss | Base HP | Speed | Behavior |
+|---|---|---|---|
+| Warden (purple) | 300 | 60 | Radial 12-bullet burst every 3s |
+| Lancer (red) | 260 | 70 | Charges at 480 px/s every ~4s; aimed 3-shot spread between charges |
+| Hive (green) | 340 | 45 | Spawns 2 minis every 4s; slow aimed shots |
 
 - Wave N spawns **N + 2** enemies; enemy speed ramps **+5% per wave**.
 - Shooters join the pool at wave 3, splitters at wave 6.
@@ -88,6 +97,26 @@ timer, or continue early). Upgrades are **permanent across runs**:
 | Hull | +25 max hull | 100 / 250 / 500 / 1000 |
 | Dash Cooldown | −0.25s | 100 / 250 / 500 / 1000 |
 | Core Magnet | +60px pickup radius | 100 / 250 / 500 / 1000 |
+| Damage | +3 bullet damage | 100 / 250 / 500 / 1000 |
+| Drift Charge | +20% multiplier build rate | 100 / 250 / 500 / 1000 |
+
+## Ships (garage)
+
+Cores also buy ships in the **GARAGE** (menu). Unlocks and selection are
+permanent; modifiers stack with upgrades:
+
+| Ship | Cost | Modifiers |
+|---|---|---|
+| Viper (cyan) | free | balanced, no modifiers |
+| Bastion (green) | 300 | +50 hull, −40 speed |
+| Dart (yellow) | 300 | −25 hull, +45 speed |
+| Vulcan (orange) | 600 | −15 hull, +2 shots/s |
+| Phantom (purple) | 900 | −15 hull, −0.5s dash cooldown, +150ms dash i-frames |
+
+## Arena themes
+
+The arena background changes every 10 waves, rotating through three palettes
+(midnight → vapor → toxin).
 
 ## Runs, checkpoints & saving
 

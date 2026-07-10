@@ -103,12 +103,20 @@ The big scene (~500 lines). Its subsystems, in rough update order:
 - **New enemy:** add an `ENEMIES` entry, a texture in `makeTextures`, an AI
   case in the update loop, and (optionally) an unlock wave in `WAVES` +
   `startWave`'s pool. Add a Guide row.
+- **New boss:** add a `BOSSES` entry (tex/size/speed/hp) + texture, then a
+  behavior branch in the `case 'boss'` AI keyed on `e.bossKind`. Kinds rotate
+  automatically by boss wave. Any new per-boss timer fields must be added to
+  `shiftTimers`.
+- **New ship:** add a `SHIPS` entry — texture, garage row, and stat
+  application (`playerStats`) all derive from the table automatically.
 - **New buff:** add a `BUFFS` entry (donut texture is generated
   automatically), then hook its effect wherever it applies via
   `buffActive('key')`. Set `bossOnly: true` to restrict its drop pool.
   Add a Guide row.
 - **New upgrade:** add to `UPGRADES` + `upgradeStats()`; the shop UI renders
   from those tables automatically.
+- **New arena theme:** add a `THEMES` entry (bg + grid colors); rotation
+  every 10 waves picks it up automatically.
 
 ## Testing notes
 

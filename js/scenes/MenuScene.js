@@ -31,7 +31,7 @@ class MenuScene extends Phaser.Scene {
     play.on('pointerout', () => play.setColor('#e8faff'));
     play.on('pointerdown', () => this.startGame());
 
-    [['[ CONTROLS ]', -125, 'Controls'], ['[ GUIDE ]', 125, 'Guide']].forEach(([label, dx, scene]) => {
+    [['[ GARAGE ]', -230, 'Garage'], ['[ CONTROLS ]', 0, 'Controls'], ['[ GUIDE ]', 210, 'Guide']].forEach(([label, dx, scene]) => {
       const btn = neonText(this, cx + dx, 483, label, 24, '#e8faff').setOrigin(0.5);
       btn.setInteractive({ useHandCursor: true });
       btn.on('pointerover', () => btn.setColor('#00f6ff'));
@@ -81,13 +81,4 @@ class MenuScene extends Phaser.Scene {
     SaveManager.resetProgress();
     this.scene.restart();
   }
-}
-
-// Shared subtle neon grid background
-function drawGrid(scene) {
-  const g = scene.add.graphics();
-  g.lineStyle(1, 0x15254a, 0.6);
-  for (let x = 0; x <= GAME_WIDTH; x += 64) { g.lineBetween(x, 0, x, GAME_HEIGHT); }
-  for (let y = 0; y <= GAME_HEIGHT; y += 64) { g.lineBetween(0, y, GAME_WIDTH, y); }
-  return g;
 }

@@ -21,11 +21,11 @@ class ShopScene extends Phaser.Scene {
     this.rows = [];
     const keys = Object.keys(UPGRADES);
     keys.forEach((key, i) => {
-      const y = 230 + i * 78;
+      const y = 196 + i * 64;
       const row = {};
       row.key = key;
       row.label = neonText(this, cx - 340, y, '', 22).setOrigin(0, 0.5);
-      row.desc = neonText(this, cx - 340, y + 24, UPGRADES[key].desc, 14, '#8899bb').setOrigin(0, 0.5);
+      row.desc = neonText(this, cx - 340, y + 22, UPGRADES[key].desc, 14, '#8899bb').setOrigin(0, 0.5);
       row.pips = neonText(this, cx + 80, y, '', 22, '#00f6ff').setOrigin(0, 0.5);
       row.buy = neonText(this, cx + 250, y, '', 22).setOrigin(0, 0.5);
       row.buy.setInteractive({ useHandCursor: true });

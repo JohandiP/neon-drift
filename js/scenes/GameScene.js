@@ -3,11 +3,11 @@ class GameScene extends Phaser.Scene {
 
   create(data) {
     makeTextures(this);
-    drawGrid(this);
+    this.themeIndex = -1; // startWave draws the arena theme
 
     this.save = SaveManager.load();
     this.runStartHigh = this.save.highScore;
-    this.stats = upgradeStats(this.save.upgrades);
+    this.stats = playerStats(this.save);
     const resume = (data && data.resume && this.save.pendingRun) ? this.save.pendingRun : null;
 
     // Run state (restored from the wave-start checkpoint when resuming)
@@ -26,8 +26,8 @@ class GameScene extends Phaser.Scene {
     this.gameEnded = false;
 
     // Player
-    this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'ship');
-    this.player.setDrag(PLAYER.drag).setMaxVelocity(PLAYER.maxSpeed).setCollideWorldBounds(true);
+    this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'ship_' + this.save.selectedShip);
+    this.player.setDrag(PLAYER.drag).setMaxVelocity(this.stats.maxSpeed).setCollideWorldBounds(true);
     this.player.body.setCircle(14, 6, 1);
 
     // Groups (pooled)
@@ -132,6 +132,13 @@ class GameScene extends Phaser.Scene {
   startWave(n) {
     this.wave = n;
     this.waveActive = true;
+    // Arena theme rotates every 10 waves (design doc §5).
+    const themeIdx = Math.floor((n - 1) / 10) % THEMES.length;
+    if (themeIdx !== this.themeIndex) {
+      this.themeIndex = themeIdx;
+      if (this.gridG) this.gridG.destroy();
+      this.gridG = drawGrid(this, themeIdx);
+    }
     // Checkpoint: quitting to menu (or closing the game) resumes by restarting
     // this wave with the values it began with — mid-wave gains roll back.
     this.save.pendingRun = {
@@ -179,21 +186,29 @@ class GameScene extends Phaser.Scene {
 
   spawnEnemy(type, x, y) {
     const cfg = ENEMIES[type];
+    // Boss kind rotates per boss wave: 5 → warden, 10 → lancer, 15 → hive...
+    let bcfg = null, bossKind = null;
+    if (type === 'boss') {
+      const kinds = Object.keys(BOSSES);
+      bossKind = kinds[Math.max(0, Math.floor(this.wave / WAVES.bossEveryNWaves) - 1) % kinds.length];
+      bcfg = BOSSES[bossKind];
+    }
     const pos = (x === undefined) ? this.edgeSpawnPoint() : { x, y };
-    const e = this.enemies.create(pos.x, pos.y, type);
+    const e = this.enemies.create(pos.x, pos.y, bcfg ? bcfg.tex : type);
     e.enemyType = type;
-    e.hp = type === 'boss' ? cfg.hp + (this.wave - 1) * 30 : cfg.hp;
+    e.bossKind = bossKind;
+    e.hp = bcfg ? bcfg.hp + (this.wave - 1) * 30 : cfg.hp;
     e.maxHp = e.hp;
     e.damage = cfg.damage;
     e.coreDrop = cfg.cores;
-    e.speed = cfg.speed * (1 + WAVES.enemySpeedRampPerWave * (this.wave - 1));
+    e.speed = (bcfg ? bcfg.speed : cfg.speed) * (1 + WAVES.enemySpeedRampPerWave * (this.wave - 1));
     // Per-enemy variation so packs spread out instead of merging into one blob:
     // individual speed, plus a sinusoidal wander applied to the homing angle.
     e.speed *= Phaser.Math.FloatBetween(0.85, 1.15);
     e.wanderPhase = Phaser.Math.FloatBetween(0, Math.PI * 2);
     e.wanderFreq = Phaser.Math.FloatBetween(1.2, 2.4);
     e.wanderAmp = { chaser: 0.65, mini: 0.85, splitter: 0.4, shooter: 0.35, boss: 0.12 }[type];
-    e.body.setCircle(cfg.size / 2);
+    e.body.setCircle((bcfg ? bcfg.size : cfg.size) / 2);
     e.nextShotAt = this.time.now + Phaser.Math.Between(1200, 2400);
     if (type === 'boss') {
       this.bossBar.setVisible(true);
@@ -231,7 +246,7 @@ class GameScene extends Phaser.Scene {
     // Re-read upgrades bought in the shop; hull upgrades add to current hull too.
     this.save = SaveManager.load();
     const prevMax = this.stats.maxHull;
-    this.stats = upgradeStats(this.save.upgrades);
+    this.stats = playerStats(this.save);
     this.hull = Math.min(this.stats.maxHull, this.hull + (this.stats.maxHull - prevMax));
     this.updateHUD();
     this.startWave(this.wave + 1);
@@ -250,7 +265,7 @@ class GameScene extends Phaser.Scene {
     b.setRotation(angle);
     const big = this.buffActive('bigshot');
     b.setScale(big ? 2.4 : 1);
-    b.damage = big ? PLAYER.bulletDamage * 2.5 : PLAYER.bulletDamage;
+    b.damage = big ? this.stats.bulletDamage * 2.5 : this.stats.bulletDamage;
     this.physics.velocityFromRotation(angle, PLAYER.bulletSpeed, b.body.velocity);
     b.diesAt = time + 1500;
     this.nextFireAt = time + 1000 / (this.stats.fireRate * (this.buffActive('rapid') ? 2 : 1));
@@ -437,7 +452,13 @@ class GameScene extends Phaser.Scene {
     this.bullets.getChildren().forEach(b => { if (b.active) b.diesAt += gap; });
     this.enemyBullets.getChildren().forEach(b => { if (b.active) b.diesAt += gap; });
     this.buffs.getChildren().forEach(b => { if (b.active) b.diesAt += gap; });
-    this.enemies.getChildren().forEach(e => { if (e.active) e.nextShotAt += gap; });
+    this.enemies.getChildren().forEach(e => {
+      if (!e.active) return;
+      e.nextShotAt += gap;
+      if (e.nextChargeAt) e.nextChargeAt += gap;
+      if (e.chargingUntil) e.chargingUntil += gap;
+      if (e.nextSpawnAt) e.nextSpawnAt += gap;
+    });
   }
 
   // ---------- Per-frame ----------
@@ -466,13 +487,13 @@ class GameScene extends Phaser.Scene {
     // Drift: lower drag, higher top speed, builds multiplier near enemies
     const drifting = k.drift.isDown;
     this.player.setDrag(drifting ? PLAYER.driftDrag : PLAYER.drag);
-    this.player.setMaxVelocity(drifting ? PLAYER.driftMaxSpeed : PLAYER.maxSpeed);
+    this.player.setMaxVelocity(drifting ? this.stats.driftMaxSpeed : this.stats.maxSpeed);
 
     if (drifting && this.multiplier < PLAYER.maxMultiplier) {
       const near = this.enemies.getChildren().some(e =>
         e.active && Phaser.Math.Distance.Between(this.player.x, this.player.y, e.x, e.y) < PLAYER.driftBuildRadius);
       if (near) {
-        this.driftHeat += dt;
+        this.driftHeat += dt * this.stats.driftRate;
         if (this.driftHeat >= 1) {
           this.driftHeat = 0;
           this.multiplier++;
@@ -491,7 +512,7 @@ class GameScene extends Phaser.Scene {
     // Dash
     if (Phaser.Input.Keyboard.JustDown(k.dash) && time >= this.dashReadyAt) {
       this.dashReadyAt = time + this.stats.dashCooldown * 1000;
-      this.invulnUntil = Math.max(this.invulnUntil, time + PLAYER.dashInvulnMs);
+      this.invulnUntil = Math.max(this.invulnUntil, time + this.stats.dashInvulnMs);
       const v = this.player.body.velocity;
       const dashAngle = (v.length() > 20) ? v.angle() : this.player.rotation;
       this.physics.velocityFromRotation(dashAngle, PLAYER.dashSpeed, this.player.body.velocity);
@@ -567,7 +588,7 @@ class GameScene extends Phaser.Scene {
             b.body.reset(this.drone.x, this.drone.y);
             b.body.enable = true;
             b.setRotation(a).setScale(1);
-            b.damage = PLAYER.bulletDamage;
+            b.damage = this.stats.bulletDamage;
             this.physics.velocityFromRotation(a, PLAYER.bulletSpeed, b.body.velocity);
             b.diesAt = time + 1500;
           }
@@ -609,11 +630,43 @@ class GameScene extends Phaser.Scene {
           }
           break;
         case 'boss':
-          this.physics.velocityFromRotation(toPlayer + wander, e.speed, e.body.velocity);
-          if (time >= e.nextShotAt) {
-            e.nextShotAt = time + 3000;
-            for (let i = 0; i < 12; i++) {
-              this.fireEnemyBullet(e.x, e.y, (i / 12) * Math.PI * 2, 170);
+          if (e.bossKind === 'lancer') {
+            // Charges at the player in bursts; aimed 3-shot spread in between.
+            if (!e.nextChargeAt) e.nextChargeAt = time + 2500;
+            if (e.chargingUntil > time) {
+              // velocity stays locked from the charge start
+            } else if (time >= e.nextChargeAt) {
+              e.chargingUntil = time + 750;
+              e.nextChargeAt = time + 4000;
+              this.physics.velocityFromRotation(toPlayer, 480, e.body.velocity);
+            } else {
+              this.physics.velocityFromRotation(toPlayer + wander, e.speed, e.body.velocity);
+              if (time >= e.nextShotAt) {
+                e.nextShotAt = time + 2200;
+                [-0.25, 0, 0.25].forEach(off => this.fireEnemyBullet(e.x, e.y, toPlayer + off, 260));
+              }
+            }
+          } else if (e.bossKind === 'hive') {
+            // Slow bruiser that births minis and lobs single aimed shots.
+            this.physics.velocityFromRotation(toPlayer + wander, e.speed, e.body.velocity);
+            if (!e.nextSpawnAt) e.nextSpawnAt = time + 3000;
+            if (time >= e.nextSpawnAt && this.enemies.countActive(true) < 35) {
+              e.nextSpawnAt = time + 4000;
+              this.spawnEnemy('mini', e.x - 30, e.y);
+              this.spawnEnemy('mini', e.x + 30, e.y);
+            }
+            if (time >= e.nextShotAt) {
+              e.nextShotAt = time + 2000;
+              this.fireEnemyBullet(e.x, e.y, toPlayer, 150);
+            }
+          } else {
+            // Warden: the classic radial burst.
+            this.physics.velocityFromRotation(toPlayer + wander, e.speed, e.body.velocity);
+            if (time >= e.nextShotAt) {
+              e.nextShotAt = time + 3000;
+              for (let i = 0; i < 12; i++) {
+                this.fireEnemyBullet(e.x, e.y, (i / 12) * Math.PI * 2, 170);
+              }
             }
           }
           break;

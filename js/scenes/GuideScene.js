@@ -27,7 +27,7 @@ class GuideScene extends Phaser.Scene {
       ['mini',     1,    'MINI',     '#ff6da8', '10 HP · fast fragment of a splitter'],
       ['shooter',  1,    'SHOOTER',  '#ffaa22', '30 HP · keeps its distance and fires at you'],
       ['splitter', 1,    'SPLITTER', '#39ff88', '40 HP · splits into two minis when killed'],
-      ['boss',     0.48, 'BOSS',     '#bb44ff', 'every 5th wave · radial bullet bursts'],
+      ['boss',     0.48, 'BOSS',     '#bb44ff', 'every 5th wave · 3 kinds rotate: burst / charger / mini-spawner'],
     ].forEach(([tex, scale, name, color, desc], i) => {
       row(140, 172 + i * 64, tex, scale, name, color, desc, true);
     });
@@ -55,7 +55,7 @@ class GuideScene extends Phaser.Scene {
       'every kill scores 100 x your multiplier · getting hit drops it back to x1',
       `${c.dash.name} dashes with brief invulnerability · ESC or P pauses`,
       'ramming an enemy hurts you both — it takes 15 damage when its hit lands on you',
-      'clear a wave to open the shop · cores and upgrades are permanent across runs',
+      'clear a wave to open the shop · upgrades and garage ships are permanent across runs',
     ].forEach((line, i) => {
       neonText(this, 190, 546 + i * 24, line, 15, '#8899bb').setOrigin(0, 0.5);
     });
