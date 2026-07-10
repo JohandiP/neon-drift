@@ -1,2 +1,21 @@
+# OS junk
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code local session config (machine-specific paths)
 .claude/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Future tooling (if a build step is ever added)
+node_modules/
+dist/

@@ -25,6 +25,13 @@ Progress (high score, cores, upgrades, key bindings) saves to `localStorage`.
 Quitting mid-run leaves a checkpoint — resume from the menu and the wave
 restarts fresh.
 
+## Documentation
+
+- [Gameplay manual](docs/GAMEPLAY.md) — every mechanic with its exact numbers:
+  enemies, buffs, upgrades, scoring, checkpoints
+- [Architecture](docs/ARCHITECTURE.md) — code structure, scene map, systems,
+  and how to add new enemies/buffs/upgrades
+
 ## Development
 
 Plain JavaScript + [Phaser 3](https://phaser.io), no build tooling. Serve the
