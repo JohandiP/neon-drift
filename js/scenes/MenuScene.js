@@ -57,6 +57,8 @@ class MenuScene extends Phaser.Scene {
     this.resetBtn.on('pointerout', () => { if (!this.resetArmed) this.resetBtn.setColor('#556077'); });
     this.resetBtn.on('pointerdown', () => this.onResetClick());
 
+    neonText(this, GAME_WIDTH - 12, GAME_HEIGHT - 14, GAME_VERSION, 13, '#556077').setOrigin(1, 1);
+
     this.input.keyboard.on('keydown-ENTER', () => this.startGame());
     this.tweens.add({ targets: play, alpha: 0.55, duration: 700, yoyo: true, repeat: -1 });
   }
