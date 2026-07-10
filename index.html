@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Drift</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #05050d;
+      height: 100%;
+      overflow: hidden;
+    }
+    #game {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas { image-rendering: auto; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <script src="lib/phaser.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/scenes/MenuScene.js"></script>
+  <script src="js/scenes/GameScene.js"></script>
+  <script src="js/scenes/ShopScene.js"></script>
+  <script src="js/scenes/GameOverScene.js"></script>
+  <script src="js/scenes/ControlsScene.js"></script>
+  <script src="js/scenes/PauseScene.js"></script>
+  <script src="js/scenes/GuideScene.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
