@@ -49,6 +49,13 @@ python3 -m http.server 8000
 Art is intentionally placeholder neon shapes for now; an AI-generated art pass
 is planned (see the design doc's milestone plan).
 
+## License
+
+[MIT](LICENSE) — free to use, modify, and share.
+
+Note: `lib/phaser.min.js` is [Phaser](https://phaser.io), bundled under its
+own MIT license.
+
 ## Roadmap
 
 - **M4** — more content: multiple ships, more bosses, arena themes
