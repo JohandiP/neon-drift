@@ -20,7 +20,8 @@ assignments swap automatically; bindings persist in the save.
 - **Hull:** 100 (+25 per Hull upgrade). Healed +15 on every wave clear.
 - **Speed:** 320 px/s max (380 while drifting), acceleration-based movement.
 - **Dash:** 820 px/s burst, 300ms invulnerability, 1.5s cooldown
-  (−0.25s per upgrade).
+  (−0.25s per upgrade). Dash i-frames are always capped 150ms below the
+  cooldown, so chained dashes can never make you permanently invulnerable.
 - **Gun:** 5 shots/s (+1.5 per upgrade), 10 damage, 640 px/s bullets.
 - After taking a hit: 800ms of invulnerability.
 
