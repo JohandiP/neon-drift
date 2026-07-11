@@ -448,27 +448,28 @@ function drawBackground(scene, themeIndex) {
   }
   g.generateTexture('bgneb_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
-  // Seamless star tiles (stars kept off the edges so none get cut).
-  // Three depths: deep = dense dust, far = mid stars, near = few bright ones.
-  for (let i = 0; i < 14; i++) {
-    g.fillStyle(theme.star, 0.08 + Math.random() * 0.12);
-    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.4 + Math.random() * 0.4);
-  }
-  g.generateTexture('starsdeep_' + idx, 256, 256);
+  // Star layers are FULL-SCREEN textures so the wrap period is the whole
+  // screen — small tiles made the same star pattern repeat in a visible
+  // grid. Stars scatter randomly, kept off the edges so none get cut at the
+  // wrap seam. Three depths: deep = dense dust, far = mid, near = bright.
+  const starLayer = (key, count, aMin, aVar, rMin, rVar) => {
+    for (let i = 0; i < count; i++) {
+      g.fillStyle(theme.star, aMin + Math.random() * aVar);
+      g.fillCircle(6 + Math.random() * (GAME_WIDTH - 12), 6 + Math.random() * (GAME_HEIGHT - 12), rMin + Math.random() * rVar);
+    }
+  };
+  starLayer('deep', 45, 0.08, 0.12, 0.4, 0.4);
+  g.generateTexture('starsdeep_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
-  for (let i = 0; i < 8; i++) {
-    g.fillStyle(theme.star, 0.15 + Math.random() * 0.2);
-    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.5 + Math.random() * 0.6);
-  }
-  g.generateTexture('starsfar_' + idx, 256, 256);
+  starLayer('far', 30, 0.15, 0.2, 0.5, 0.6);
+  g.generateTexture('starsfar_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
-  for (let i = 0; i < 3; i++) {
-    g.fillStyle(theme.star, 0.3 + Math.random() * 0.3);
-    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.9 + Math.random() * 0.7);
-  }
+  starLayer('near', 12, 0.3, 0.3, 0.9, 0.7);
   g.fillStyle(0xffffff, 0.85);
-  g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 1.5);
-  g.generateTexture('starsnear_' + idx, 256, 256);
+  for (let i = 0; i < 3; i++) {
+    g.fillCircle(6 + Math.random() * (GAME_WIDTH - 12), 6 + Math.random() * (GAME_HEIGHT - 12), 1.5);
+  }
+  g.generateTexture('starsnear_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
   if (!scene.textures.exists('gridtile_' + idx)) {
     g.lineStyle(1, theme.grid, 0.5);
