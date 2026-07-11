@@ -31,6 +31,17 @@ class ControlsScene extends Phaser.Scene {
     neonText(this, cx + 230, yAim, 'MOUSE (AUTO-FIRE)', 22, '#556077').setOrigin(1, 0.5);
     neonText(this, cx - 230, yAim + 30, 'arrow keys always work as alternate movement', 14, '#556077').setOrigin(0, 0.5);
 
+    this.fpsToggle = neonText(this, cx, 600, '', 20).setOrigin(0.5);
+    this.fpsToggle.setInteractive({ useHandCursor: true });
+    this.fpsToggle.on('pointerover', () => this.fpsToggle.setColor('#00f6ff'));
+    this.fpsToggle.on('pointerout', () => this.refreshFps());
+    this.fpsToggle.on('pointerdown', () => {
+      this.save.showFps = !this.save.showFps;
+      SaveManager.save(this.save);
+      this.refreshFps();
+    });
+    this.refreshFps();
+
     const reset = neonText(this, cx - 140, 655, '[ RESET ]', 26).setOrigin(0.5);
     const back = neonText(this, cx + 140, 655, '[ BACK ]', 26).setOrigin(0.5);
     [reset, back].forEach(b => {
@@ -78,5 +89,10 @@ class ControlsScene extends Phaser.Scene {
     this.rows.forEach(row => {
       row.keyText.setText(this.save.controls[row.action].name).setColor('#ffe14d');
     });
+  }
+
+  refreshFps() {
+    this.fpsToggle.setText(`[ SHOW FPS: ${this.save.showFps ? 'ON' : 'OFF'} ]`)
+      .setColor(this.save.showFps ? '#39ff88' : '#8899bb');
   }
 }

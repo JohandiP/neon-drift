@@ -10,6 +10,7 @@ const SaveManager = {
       upgrades: { fireRate: 0, hull: 0, dashCooldown: 0, magnet: 0, damage: 0, drift: 0 },
       selectedShip: 'viper',
       unlockedShips: ['viper'],
+      showFps: false,
       controls: JSON.parse(JSON.stringify(DEFAULT_CONTROLS)),
       // Wave-start checkpoint of the current run; null when no run to resume.
       pendingRun: null,

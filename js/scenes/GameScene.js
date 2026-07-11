@@ -127,6 +127,8 @@ class GameScene extends Phaser.Scene {
     this.hudDash = neonText(this, GAME_WIDTH / 2, 52, 'DASH READY', 14, '#00f6ff').setOrigin(0.5).setDepth(d);
     this.hudBuffs = neonText(this, 20, 78, '', 15, '#ffe14d').setDepth(d);
     this.lastBuffText = '';
+    this.hudFps = neonText(this, GAME_WIDTH - 20, 78, '', 14, '#556077').setOrigin(1, 0).setDepth(d);
+    this.fpsNextUpdate = 0;
 
     this.bossBar = this.add.rectangle(GAME_WIDTH / 2 - 200, 88, 400, 10, 0xbb44ff).setOrigin(0, 0.5).setDepth(d).setVisible(false);
     this.bossBarBg = this.add.rectangle(GAME_WIDTH / 2, 88, 404, 14, 0x1a1a2e).setDepth(d - 1).setVisible(false);
@@ -677,6 +679,11 @@ class GameScene extends Phaser.Scene {
 
     const shownHull = Math.ceil(this.hull);
     if (shownHull !== this.lastShownHull) { this.lastShownHull = shownHull; this.updateHUD(); }
+
+    if (this.save.showFps && time >= this.fpsNextUpdate) {
+      this.fpsNextUpdate = time + 250;
+      this.hudFps.setText(`${Math.round(this.game.loop.actualFps)} FPS`);
+    }
 
     const buffText = Object.keys(this.activeBuffs)
       .filter(k => this.activeBuffs[k] > time)
