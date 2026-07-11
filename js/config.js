@@ -67,11 +67,12 @@ const BOSSES = {
   hive:   { tex: 'boss_hive',   size: 110, speed: 45, hp: 340 }, // spawns minis
 };
 
-// Arena themes (M4): background changes every 10 waves.
+// Arena themes (M4): background changes every 10 waves. nebula/star tint the
+// procedural space backdrop (M5).
 const THEMES = [
-  { bg: 0x0a0a18, grid: 0x15254a }, // midnight
-  { bg: 0x160a1c, grid: 0x43195e }, // vapor
-  { bg: 0x081410, grid: 0x14503a }, // toxin
+  { bg: 0x0a0a18, grid: 0x15254a, nebula: 0x1b2f6e, star: 0xaac8ff }, // midnight
+  { bg: 0x160a1c, grid: 0x43195e, nebula: 0x5e1b6e, star: 0xe3b3ff }, // vapor
+  { bg: 0x081410, grid: 0x14503a, nebula: 0x0f5e3c, star: 0xa8ffd9 }, // toxin
 ];
 
 // Timed power-ups dropped by enemies (guaranteed from bosses). Picking up the
@@ -421,16 +422,36 @@ function drawShipTexture(g, key, spec, color) {
   g.clear();
 }
 
-// Subtle background grid; themeIndex picks the arena palette (menu screens
-// use theme 0). Drawn at depth -10 so gameplay always renders above it.
-function drawGrid(scene, themeIndex) {
-  const theme = THEMES[themeIndex || 0];
+// Arena background (M5): nebula clouds + starfield + the classic grid, all in
+// the theme's palette. Rendered once into a cached texture per theme (one
+// draw call at runtime) and placed at depth -10 so gameplay renders above it.
+// Menu screens use theme 0.
+function drawBackground(scene, themeIndex) {
+  const idx = themeIndex || 0;
+  const theme = THEMES[idx];
   scene.cameras.main.setBackgroundColor(theme.bg);
-  const g = scene.add.graphics().setDepth(-10);
-  g.lineStyle(1, theme.grid, 0.6);
-  for (let x = 0; x <= GAME_WIDTH; x += 64) { g.lineBetween(x, 0, x, GAME_HEIGHT); }
-  for (let y = 0; y <= GAME_HEIGHT; y += 64) { g.lineBetween(0, y, GAME_WIDTH, y); }
-  return g;
+  const key = 'bg_' + idx;
+  if (!scene.textures.exists(key)) {
+    const g = scene.make.graphics({ add: false });
+    for (let i = 0; i < 5; i++) {
+      const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
+      const r = 140 + Math.random() * 200;
+      g.fillStyle(theme.nebula, 0.05); g.fillCircle(x, y, r);
+      g.fillStyle(theme.nebula, 0.04); g.fillCircle(x, y, r * 0.6);
+    }
+    for (let i = 0; i < 110; i++) {
+      const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
+      const bright = Math.random() > 0.92;
+      g.fillStyle(bright ? 0xffffff : theme.star, 0.15 + Math.random() * 0.45);
+      g.fillCircle(x, y, bright ? 1.6 : 0.6 + Math.random() * 0.9);
+    }
+    g.lineStyle(1, theme.grid, 0.5);
+    for (let x = 0; x <= GAME_WIDTH; x += 64) { g.lineBetween(x, 0, x, GAME_HEIGHT); }
+    for (let y = 0; y <= GAME_HEIGHT; y += 64) { g.lineBetween(0, y, GAME_WIDTH, y); }
+    g.generateTexture(key, GAME_WIDTH, GAME_HEIGHT);
+    g.destroy();
+  }
+  return scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, key).setDepth(-10);
 }
 
 const FONT = { fontFamily: 'Courier New, monospace', color: '#e8faff' };

@@ -6,7 +6,7 @@ class MenuScene extends Phaser.Scene {
     const save = SaveManager.load();
     const cx = GAME_WIDTH / 2;
 
-    drawGrid(this);
+    drawBackground(this);
 
     const title = neonText(this, cx, 170, 'NEON DRIFT', 84, '#00f6ff').setOrigin(0.5);
     title.setShadow(0, 0, '#00f6ff', 24, false, true);

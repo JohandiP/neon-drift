@@ -6,7 +6,7 @@ class GarageScene extends Phaser.Scene {
   create() {
     makeTextures(this);
     this.save = SaveManager.load();
-    drawGrid(this);
+    drawBackground(this);
     const cx = GAME_WIDTH / 2;
 
     neonText(this, cx, 60, 'GARAGE', 48, '#00f6ff').setOrigin(0.5)

@@ -6,7 +6,7 @@ class GameOverScene extends Phaser.Scene {
   create() {
     const cx = GAME_WIDTH / 2;
     const r = this.result;
-    drawGrid(this);
+    drawBackground(this);
 
     neonText(this, cx, 160, 'HULL BREACHED', 64, '#ff2d78').setOrigin(0.5)
       .setShadow(0, 0, '#ff2d78', 20, false, true);

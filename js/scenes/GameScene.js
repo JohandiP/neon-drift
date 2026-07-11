@@ -181,7 +181,7 @@ class GameScene extends Phaser.Scene {
     if (themeIdx !== this.themeIndex) {
       this.themeIndex = themeIdx;
       if (this.gridG) this.gridG.destroy();
-      this.gridG = drawGrid(this, themeIdx);
+      this.gridG = drawBackground(this, themeIdx);
     }
     // Checkpoint: quitting to menu (or closing the game) resumes by restarting
     // this wave with the values it began with — mid-wave gains roll back.

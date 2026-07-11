@@ -6,7 +6,7 @@ class GuideScene extends Phaser.Scene {
 
   create() {
     makeTextures(this);
-    drawGrid(this);
+    drawBackground(this);
     const c = SaveManager.load().controls;
     const cx = GAME_WIDTH / 2;
 

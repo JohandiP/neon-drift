@@ -6,7 +6,7 @@ class ControlsScene extends Phaser.Scene {
   create() {
     this.save = SaveManager.load();
     this.rebinding = null;
-    drawGrid(this);
+    drawBackground(this);
     const cx = GAME_WIDTH / 2;
 
     neonText(this, cx, 95, 'CONTROLS', 52, '#00f6ff').setOrigin(0.5);
