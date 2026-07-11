@@ -133,18 +133,12 @@ function makeTextures(scene) {
   if (scene.textures.exists('ship')) return;
   const g = scene.make.graphics({ add: false });
 
-  // Player ships: arrow pointing right (Phaser rotation 0 = right), one
-  // texture per garage ship. 'ship' stays as an alias of the default Viper
-  // for UI screens.
-  const drawShip = (key, color) => {
-    g.fillStyle(color);
-    g.beginPath();
-    g.moveTo(40, 15); g.lineTo(0, 0); g.lineTo(10, 15); g.lineTo(0, 30);
-    g.closePath(); g.fillPath();
-    g.generateTexture(key, 40, 30); g.clear();
-  };
-  drawShip('ship', SHIPS.viper.color);
-  Object.entries(SHIPS).forEach(([key, s]) => drawShip('ship_' + key, s.color));
+  // Player ships (M5 vector art): layered neon vector hulls pointing right
+  // (Phaser rotation 0 = right), one texture per garage ship, drawn at 2x
+  // (80x60) and displayed at 0.5 scale in the arena for crisp edges.
+  // 'ship' stays as an alias of the default Viper for UI screens.
+  Object.entries(SHIPS).forEach(([key, s]) => drawShipTexture(g, 'ship_' + key, SHIP_ART[key], s.color));
+  drawShipTexture(g, 'ship', SHIP_ART.viper, SHIPS.viper.color);
 
   // Enemies
   g.fillStyle(ENEMIES.chaser.tint); g.fillRect(0, 0, 26, 26);
@@ -232,6 +226,117 @@ function keyDisplayName(event) {
   if (event.key === ' ') return 'SPACE';
   if (event.key.length === 1) return event.key.toUpperCase();
   return event.key.replace('Arrow', '').toUpperCase();
+}
+
+// Layered vector ship art (M5). Local coordinates face right, origin at the
+// ship's center, scaled 0.5x onto an 80x60 texture. Layers back-to-front:
+// engine glow, pods/barrels, dark hull + neon edge, translucent panel,
+// bright leading edges, seams, nozzles, cockpit canopy.
+const SHIP_ART = {
+  viper: {
+    pale: 0xbffaff,
+    hull: [[70,0],[18,-12],[-20,-14],[-46,-30],[-58,-13],[-70,-9],[-70,9],[-58,13],[-46,30],[-20,14],[18,12]],
+    panel: [[52,0],[14,-8],[-18,-9],[-38,-20],[-46,-9],[-56,-6],[-56,6],[-46,9],[-38,20],[-18,9],[14,8]],
+    edges: [[[70,0],[18,-12],[-20,-14],[-46,-30]],[[70,0],[18,12],[-20,14],[-46,30]]],
+    seams: [[[-22,-15],[-34,-23]],[[-22,15],[-34,23]],[[-10,-13],[-20,-19]],[[-10,13],[-20,19]]],
+    spine: [[58,0],[-62,0]],
+    cockpit: { x: 26, y: 0, w: 26, h: 11 },
+    engines: [[-73,-10,9,7],[-73,3,9,7]],
+    glows: [{ x: -72, y: 0 }],
+  },
+  bastion: {
+    pale: 0xc8ffdf,
+    preRects: [[-42,-38,24,8],[-42,30,24,8]],
+    hull: [[56,0],[34,-15],[8,-19],[-14,-33],[-46,-33],[-50,-19],[-62,-15],[-62,15],[-50,19],[-46,33],[-14,33],[8,19],[34,15]],
+    panel: [[44,0],[28,-11],[6,-14],[-14,-26],[-42,-26],[-45,-14],[-54,-11],[-54,11],[-45,14],[-42,26],[-14,26],[6,14],[28,11]],
+    seams: [[[-8,-20],[-8,20]],[[-28,-24],[-28,24]]],
+    cockpit: { x: 28, y: 0, w: 20, h: 10 },
+    engines: [[-66,-12,8,8],[-66,4,8,8]],
+    glows: [{ x: -66, y: -8 }, { x: -66, y: 8 }],
+  },
+  dart: {
+    pale: 0xfff3c0,
+    hull: [[70,0],[22,-6],[-26,-8],[-36,-22],[-50,-22],[-42,-7],[-64,-5],[-64,5],[-42,7],[-50,22],[-36,22],[-26,8],[22,6]],
+    panel: [[56,0],[20,-4],[-24,-5],[-56,-3],[-56,3],[-24,5],[20,4]],
+    spine: [[62,0],[-58,0]],
+    cockpit: { x: 30, y: 0, w: 22, h: 8 },
+    engines: [[-68,-4,8,8]],
+    glows: [{ x: -66, y: 0 }],
+  },
+  vulcan: {
+    pale: 0xffe2b8,
+    preRects: [[28,-15,34,7],[28,8,34,7]],
+    muzzles: [[58,-14,7,5],[58,9,7,5]],
+    hull: [[32,-20],[-6,-26],[-38,-28],[-54,-14],[-58,0],[-54,14],[-38,28],[-6,26],[32,20]],
+    panel: [[24,-14],[-8,-19],[-34,-20],[-46,-10],[-49,0],[-46,10],[-34,20],[-8,19],[24,14]],
+    seams: [[[-20,-22],[-20,22]]],
+    cockpit: { x: 8, y: 0, w: 20, h: 12 },
+    engines: [[-62,-12,8,8],[-62,4,8,8]],
+    glows: [{ x: -60, y: -8 }, { x: -60, y: 8 }],
+  },
+  phantom: {
+    pale: 0xeacdff,
+    hull: [[64,0],[12,-9],[-16,-34],[-46,-42],[-34,-15],[-56,-8],[-56,8],[-34,15],[-46,42],[-16,34],[12,9]],
+    panel: [[50,0],[10,-6],[-14,-26],[-36,-32],[-28,-12],[-48,-6],[-48,6],[-28,12],[-36,32],[-14,26],[10,6]],
+    seams: [[[12,-9],[-30,-11]],[[12,9],[-30,11]],[[-16,-34],[-27,-13]],[[-16,34],[-27,13]]],
+    canopyPoly: [[32,0],[20,-5],[8,0],[20,5]],
+    glows: [{ x: -52, y: 0 }],
+  },
+};
+
+function drawShipTexture(g, key, spec, color) {
+  const s = 0.5, cx = 44, cy = 30;
+  const X = x => cx + x * s, Y = y => cy + y * s;
+  const poly = pts => {
+    g.beginPath();
+    g.moveTo(X(pts[0][0]), Y(pts[0][1]));
+    for (let i = 1; i < pts.length; i++) g.lineTo(X(pts[i][0]), Y(pts[i][1]));
+    g.closePath();
+  };
+  spec.glows.forEach(gl => {
+    g.fillStyle(color, 0.14); g.fillCircle(X(gl.x), Y(gl.y), 7);
+    g.fillStyle(color, 0.3); g.fillCircle(X(gl.x), Y(gl.y), 4);
+    g.fillStyle(spec.pale, 0.9); g.fillCircle(X(gl.x), Y(gl.y), 1.8);
+  });
+  (spec.preRects || []).forEach(r => {
+    g.fillStyle(0x101322, 1); g.fillRect(X(r[0]), Y(r[1]), r[2] * s, r[3] * s);
+    g.lineStyle(1, color, 1); g.strokeRect(X(r[0]), Y(r[1]), r[2] * s, r[3] * s);
+  });
+  (spec.muzzles || []).forEach(r => {
+    g.fillStyle(spec.pale, 0.9); g.fillRect(X(r[0]), Y(r[1]), r[2] * s, r[3] * s);
+  });
+  g.fillStyle(0x101322, 1);
+  g.lineStyle(1.2, color, 1);
+  poly(spec.hull); g.fillPath(); g.strokePath();
+  g.fillStyle(color, 0.15);
+  poly(spec.panel); g.fillPath();
+  if (spec.edges) {
+    g.lineStyle(1.2, spec.pale, 0.9);
+    spec.edges.forEach(e => {
+      g.beginPath();
+      g.moveTo(X(e[0][0]), Y(e[0][1]));
+      for (let i = 1; i < e.length; i++) g.lineTo(X(e[i][0]), Y(e[i][1]));
+      g.strokePath();
+    });
+  }
+  g.lineStyle(0.8, color, 0.5);
+  if (spec.spine) g.lineBetween(X(spec.spine[0][0]), Y(spec.spine[0][1]), X(spec.spine[1][0]), Y(spec.spine[1][1]));
+  (spec.seams || []).forEach(sm => g.lineBetween(X(sm[0][0]), Y(sm[0][1]), X(sm[1][0]), Y(sm[1][1])));
+  (spec.engines || []).forEach(r => {
+    g.fillStyle(0x0c1020, 1); g.fillRect(X(r[0]), Y(r[1]), r[2] * s, r[3] * s);
+    g.lineStyle(1, color, 1); g.strokeRect(X(r[0]), Y(r[1]), r[2] * s, r[3] * s);
+  });
+  if (spec.cockpit) {
+    const c = spec.cockpit;
+    g.fillStyle(spec.pale, 0.92);
+    g.fillEllipse(X(c.x), Y(c.y), c.w * s, c.h * s);
+  }
+  if (spec.canopyPoly) {
+    g.fillStyle(spec.pale, 0.92);
+    poly(spec.canopyPoly); g.fillPath();
+  }
+  g.generateTexture(key, 80, 60);
+  g.clear();
 }
 
 // Subtle background grid; themeIndex picks the arena palette (menu screens

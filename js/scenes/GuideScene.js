@@ -48,7 +48,7 @@ class GuideScene extends Phaser.Scene {
 
     // --- Basics (bottom) ---
     neonText(this, 110, 508, 'BASICS', 22, '#00f6ff');
-    this.add.image(140, 590, 'ship').setAngle(-90);
+    this.add.image(140, 590, 'ship').setAngle(-90).setScale(0.6);
     [
       `move with ${c.up.name} ${c.left.name} ${c.down.name} ${c.right.name} or arrows · your ship auto-fires at the mouse cursor`,
       `hold ${c.drift.name} near enemies to drift — raises the multiplier (the x-number under SCORE, up to x8)`,

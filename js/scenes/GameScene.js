@@ -40,11 +40,14 @@ class GameScene extends Phaser.Scene {
 
     // Player
     this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'ship_' + this.save.selectedShip);
+    // Ship textures are drawn at 2x (80x60) for crisp vector edges; display
+    // at half scale so the world size (and feel) is unchanged.
+    this.player.setScale(0.5);
     this.player.setDrag(PLAYER.drag).setCollideWorldBounds(true);
     // Clamp the velocity VECTOR, not per-axis (setMaxVelocity) — per-axis
     // clamping let diagonal movement run 41% over the design speed.
     this.player.body.setMaxSpeed(this.stats.maxSpeed);
-    this.player.body.setCircle(14, 6, 1);
+    this.player.body.setCircle(28, 16, 2); // texture px; effective radius 14 at 0.5 scale
     this.dashBoostUntil = 0;
 
     // Groups (pooled)

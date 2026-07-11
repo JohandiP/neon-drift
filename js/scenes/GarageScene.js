@@ -15,7 +15,7 @@ class GarageScene extends Phaser.Scene {
 
     this.rows = Object.entries(SHIPS).map(([key, ship], i) => {
       const y = 180 + i * 88;
-      const icon = this.add.image(200, y, 'ship_' + key).setAngle(-90).setScale(1.2);
+      const icon = this.add.image(200, y, 'ship_' + key).setAngle(-90).setScale(0.9);
       this.tweens.add({ targets: icon, y: y - 4, duration: 900 + i * 120, yoyo: true, repeat: -1 });
       const color = '#' + ship.color.toString(16).padStart(6, '0');
       neonText(this, 260, y - 22, ship.name, 22, color).setOrigin(0, 0.5);
