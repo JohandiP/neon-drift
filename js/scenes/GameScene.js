@@ -71,6 +71,18 @@ class GameScene extends Phaser.Scene {
       blendMode: 'ADD',
     });
 
+    // Engine trail: emitted from the ship's tail while moving (see update).
+    this.engineTrail = this.add.particles(0, 0, 'particle', {
+      speed: { min: 8, max: 30 },
+      lifespan: 280,
+      scale: { start: 0.9, end: 0 },
+      alpha: { start: 0.7, end: 0 },
+      tint: (SHIPS[this.save.selectedShip] || SHIPS.viper).color,
+      emitting: false,
+      blendMode: 'ADD',
+    }).setDepth(-1);
+    this.trailNextAt = 0;
+
     // Collisions
     this.physics.add.collider(this.enemies, this.enemies); // keeps packs from stacking into one blob
     this.physics.add.overlap(this.bullets, this.enemies, (b, e) => this.onBulletHitsEnemy(b, e));
@@ -588,6 +600,16 @@ class GameScene extends Phaser.Scene {
     // Aim at the mouse (or the pilot's virtual cursor in demo mode)
     const aim = this.aimTarget();
     this.player.setRotation(Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y));
+
+    // Engine trail while under way (denser during a dash)
+    if (this.player.body.velocity.length() > 60 && time >= this.trailNextAt) {
+      this.trailNextAt = time + (time < this.dashBoostUntil ? 16 : 38);
+      const back = this.player.rotation + Math.PI;
+      this.engineTrail.emitParticleAt(
+        this.player.x + Math.cos(back) * 15,
+        this.player.y + Math.sin(back) * 15
+      );
+    }
 
     // Dash
     if (Phaser.Input.Keyboard.JustDown(k.dash) && time >= this.dashReadyAt) {
