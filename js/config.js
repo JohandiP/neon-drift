@@ -1,5 +1,5 @@
 // Tuning constants — all gameplay numbers live here (see design doc §3-4).
-const GAME_VERSION = 'v0.4.1'; // bump when tagging a release (vMAJOR.MINOR.PATCH)
+const GAME_VERSION = 'v0.4.2'; // bump when tagging a release (vMAJOR.MINOR.PATCH)
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 
