@@ -432,49 +432,67 @@ function drawBackground(scene, themeIndex) {
   const theme = THEMES[idx];
   scene.cameras.main.setBackgroundColor(theme.bg);
 
-  if (!scene.textures.exists('bgneb_' + idx)) {
-    const g = scene.make.graphics({ add: false });
-    for (let i = 0; i < 5; i++) {
-      const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
-      const r = 140 + Math.random() * 200;
-      g.fillStyle(theme.nebula, 0.05); g.fillCircle(x, y, r);
-      g.fillStyle(theme.nebula, 0.04); g.fillCircle(x, y, r * 0.6);
-    }
-    g.generateTexture('bgneb_' + idx, GAME_WIDTH, GAME_HEIGHT);
-    g.clear();
-    // Seamless star tiles (stars kept off the edges so none get cut)
-    for (let i = 0; i < 8; i++) {
-      g.fillStyle(theme.star, 0.15 + Math.random() * 0.2);
-      g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.5 + Math.random() * 0.6);
-    }
-    g.generateTexture('starsfar_' + idx, 256, 256);
-    g.clear();
-    for (let i = 0; i < 3; i++) {
-      g.fillStyle(theme.star, 0.3 + Math.random() * 0.3);
-      g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.9 + Math.random() * 0.7);
-    }
-    g.fillStyle(0xffffff, 0.85);
-    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 1.5);
-    g.generateTexture('starsnear_' + idx, 256, 256);
-    g.clear();
+  // The sky regenerates on every draw (new wave group, scene entry), so star
+  // and nebula layouts are always fresh. Old textures are removed first to
+  // avoid leaking GPU memory; the caller has already destroyed the previous
+  // background. The deterministic grid tile stays cached.
+  ['bgneb_' + idx, 'starsdeep_' + idx, 'starsfar_' + idx, 'starsnear_' + idx].forEach(k => {
+    if (scene.textures.exists(k)) scene.textures.remove(k);
+  });
+  const g = scene.make.graphics({ add: false });
+  for (let i = 0; i < 5; i++) {
+    const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
+    const r = 140 + Math.random() * 200;
+    g.fillStyle(theme.nebula, 0.05); g.fillCircle(x, y, r);
+    g.fillStyle(theme.nebula, 0.04); g.fillCircle(x, y, r * 0.6);
+  }
+  g.generateTexture('bgneb_' + idx, GAME_WIDTH, GAME_HEIGHT);
+  g.clear();
+  // Seamless star tiles (stars kept off the edges so none get cut).
+  // Three depths: deep = dense dust, far = mid stars, near = few bright ones.
+  for (let i = 0; i < 14; i++) {
+    g.fillStyle(theme.star, 0.08 + Math.random() * 0.12);
+    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.4 + Math.random() * 0.4);
+  }
+  g.generateTexture('starsdeep_' + idx, 256, 256);
+  g.clear();
+  for (let i = 0; i < 8; i++) {
+    g.fillStyle(theme.star, 0.15 + Math.random() * 0.2);
+    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.5 + Math.random() * 0.6);
+  }
+  g.generateTexture('starsfar_' + idx, 256, 256);
+  g.clear();
+  for (let i = 0; i < 3; i++) {
+    g.fillStyle(theme.star, 0.3 + Math.random() * 0.3);
+    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.9 + Math.random() * 0.7);
+  }
+  g.fillStyle(0xffffff, 0.85);
+  g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 1.5);
+  g.generateTexture('starsnear_' + idx, 256, 256);
+  g.clear();
+  if (!scene.textures.exists('gridtile_' + idx)) {
     g.lineStyle(1, theme.grid, 0.5);
     g.lineBetween(0, 0, 0, 64);
     g.lineBetween(0, 0, 64, 0);
     g.generateTexture('gridtile_' + idx, 64, 64);
-    g.destroy();
   }
+  g.destroy();
 
   const cx = GAME_WIDTH / 2, cy = GAME_HEIGHT / 2;
   const neb = scene.add.image(cx, cy, 'bgneb_' + idx);
+  const deep = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'starsdeep_' + idx);
   const far = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'starsfar_' + idx);
   const near = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'starsnear_' + idx);
   const grid = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'gridtile_' + idx);
-  const bg = scene.add.container(0, 0, [neb, far, near, grid]).setDepth(-10);
+  const bg = scene.add.container(0, 0, [neb, deep, far, near, grid]).setDepth(-10);
 
-  // Scroll the star layers; off-then-on so scene restarts don't stack handlers.
-  // A paused scene stops emitting update, so stars freeze with the game.
+  // Scroll the star layers at a 1:3:9 depth ratio; off-then-on so scene
+  // restarts don't stack handlers. Paused scenes stop emitting update, so
+  // the stars freeze with the game.
   if (scene.__bgScroll) scene.events.off('update', scene.__bgScroll);
   scene.__bgScroll = (time, delta) => {
+    deep.tilePositionX += 0.002 * delta;
+    deep.tilePositionY += 0.0007 * delta;
     far.tilePositionX += 0.006 * delta;
     far.tilePositionY += 0.002 * delta;
     near.tilePositionX += 0.018 * delta;
