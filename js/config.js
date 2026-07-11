@@ -53,7 +53,7 @@ const SHIPS = {
   dart:    { name: 'DART',    cost: 300, color: 0xffe14d, desc: 'fast and fragile',
              mods: { hull: -25, speed: 45 } },
   vulcan:  { name: 'VULCAN',  cost: 600, color: 0xffaa22, desc: 'extra guns, thin armor',
-             mods: { hull: -15, fireRate: 2 } },
+             mods: { hull: -15, fireRate: 2 }, barrelOffset: 6 }, // alternating twin barrels
   phantom: { name: 'PHANTOM', cost: 900, color: 0xbb44ff, desc: 'dash master',
              mods: { hull: -15, dashCooldown: -0.5, dashInvuln: 150 } },
 };

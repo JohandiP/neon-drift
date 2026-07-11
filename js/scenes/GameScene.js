@@ -327,8 +327,18 @@ class GameScene extends Phaser.Scene {
     const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y);
     const b = this.bullets.get(this.player.x, this.player.y);
     if (!b) return;
+    // Ships with twin barrels (Vulcan) alternate shots between them; the
+    // offset is perpendicular to the aim so it tracks the ship's rotation.
+    const barrel = (SHIPS[this.save.selectedShip] || SHIPS.viper).barrelOffset || 0;
+    let sideX = 0, sideY = 0;
+    if (barrel) {
+      this.barrelSide = -(this.barrelSide || 1);
+      const perp = angle + Math.PI / 2;
+      sideX = Math.cos(perp) * barrel * this.barrelSide;
+      sideY = Math.sin(perp) * barrel * this.barrelSide;
+    }
     b.setActive(true).setVisible(true);
-    b.body.reset(this.player.x + Math.cos(angle) * 24, this.player.y + Math.sin(angle) * 24);
+    b.body.reset(this.player.x + Math.cos(angle) * 24 + sideX, this.player.y + Math.sin(angle) * 24 + sideY);
     b.body.enable = true;
     b.setRotation(angle);
     const big = this.buffActive('bigshot');
