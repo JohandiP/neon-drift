@@ -386,6 +386,7 @@ class GameScene extends Phaser.Scene {
       const c = this.cores.get(x + Phaser.Math.Between(-18, 18), y + Phaser.Math.Between(-18, 18));
       if (!c) break;
       c.setActive(true).setVisible(true);
+      c.setScale(0.5); // 2x texture
       c.body.reset(c.x, c.y);
       c.body.enable = true;
       c.setCollideWorldBounds(true);
@@ -405,6 +406,7 @@ class GameScene extends Phaser.Scene {
     const pool = Object.keys(BUFFS).filter(k => !BUFFS[k].bossOnly || isBossWave);
     const type = Phaser.Utils.Array.GetRandom(pool);
     const b = this.buffs.create(x, y, 'buff_' + type);
+    b.setScale(0.5); // 2x texture
     b.buffType = type;
     b.diesAt = this.time.now + BUFF_LIFETIME_MS;
     b.setCollideWorldBounds(true);

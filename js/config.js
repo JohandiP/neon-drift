@@ -240,12 +240,17 @@ function makeTextures(scene) {
   g.fillStyle(0xffb3b3, 0.95); g.fillCircle(10, 10, 2.5);
   g.generateTexture('enemyBullet', 20, 20); g.clear();
 
-  // Core pickup: yellow diamond
-  g.fillStyle(0xffe14d);
+  // Core pickup: faceted energy crystal with a soft aura (2x, shown at 0.5)
+  g.fillStyle(0xffe14d, 0.22); g.fillCircle(14, 14, 13);
+  g.fillStyle(0xffe14d, 1);
   g.beginPath();
-  g.moveTo(7, 0); g.lineTo(14, 7); g.lineTo(7, 14); g.lineTo(0, 7);
+  g.moveTo(14, 2); g.lineTo(26, 14); g.lineTo(14, 26); g.lineTo(2, 14);
   g.closePath(); g.fillPath();
-  g.generateTexture('core', 14, 14); g.clear();
+  g.fillStyle(0xc99a10, 0.55);
+  g.beginPath(); g.moveTo(14, 2); g.lineTo(26, 14); g.lineTo(14, 14); g.closePath(); g.fillPath();
+  g.beginPath(); g.moveTo(14, 26); g.lineTo(2, 14); g.lineTo(14, 14); g.closePath(); g.fillPath();
+  g.fillStyle(0xfff7cf, 1); g.fillCircle(11, 11, 2.2);
+  g.generateTexture('core', 28, 28); g.clear();
 
   // Assist drone: mint wingman in the ship style (2x, displayed at 0.5)
   g.fillStyle(0x7dffca, 0.22); g.fillCircle(7, 16, 5);
@@ -257,11 +262,27 @@ function makeTextures(scene) {
   g.fillStyle(0xe4fff4, 0.95); g.fillCircle(30, 16, 2.2);
   g.generateTexture('drone', 44, 32); g.clear();
 
-  // Buff pickups: colored donuts
+  // Buff pickups: colored donuts with an identity glyph in the hole
+  // (2x textures shown at 0.5 scale)
   Object.entries(BUFFS).forEach(([key, cfg]) => {
-    g.fillStyle(cfg.color); g.fillCircle(11, 11, 11);
-    g.fillStyle(0x05050d); g.fillCircle(11, 11, 5);
-    g.generateTexture('buff_' + key, 22, 22); g.clear();
+    g.fillStyle(cfg.color, 0.18); g.fillCircle(22, 22, 21);
+    g.fillStyle(cfg.color, 1); g.fillCircle(22, 22, 17);
+    g.fillStyle(0x0a0a18, 1); g.fillCircle(22, 22, 11);
+    g.fillStyle(0xffffff, 0.9);
+    if (key === 'regen') {
+      g.fillRect(19, 15, 6, 14); g.fillRect(15, 19, 14, 6);
+    } else if (key === 'shield') {
+      g.lineStyle(2.6, 0xffffff, 0.9); g.strokeCircle(22, 22, 5.5);
+    } else if (key === 'bigshot') {
+      g.fillCircle(22, 22, 5.5);
+    } else if (key === 'rapid') {
+      g.fillRect(14, 19.5, 8, 5); g.fillRect(24, 19.5, 8, 5);
+    } else if (key === 'assist') {
+      g.beginPath();
+      g.moveTo(28, 22); g.lineTo(17, 16); g.lineTo(19, 22); g.lineTo(17, 28);
+      g.closePath(); g.fillPath();
+    }
+    g.generateTexture('buff_' + key, 44, 44); g.clear();
   });
 
   // Particle: soft round spark

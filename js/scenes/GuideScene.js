@@ -35,12 +35,12 @@ class GuideScene extends Phaser.Scene {
     // --- Pickups (right column) ---
     neonText(this, 670, 112, 'PICKUPS', 22, '#ffe14d');
     [
-      ['core',         1.3, 'CORE',       '#ffe14d', 'currency · chases you · spend in the shop'],
-      ['buff_regen',   1,   'REGEN',      '#39ff88', '+6 hull per second for 6s'],
-      ['buff_shield',  1,   'SHIELD',     '#00f6ff', 'invulnerable for 4s'],
-      ['buff_bigshot', 1,   'BIG SHOT',   '#ff2d78', 'huge bullets, 2.5x damage, for 6s'],
-      ['buff_rapid',   1,   'RAPID FIRE', '#ffe14d', 'double fire rate for 6s'],
-      ['buff_assist',  1,   'ASSIST',     '#7dffca', 'drone wingman for 10s · boss waves only'],
+      ['core',         0.65, 'CORE',       '#ffe14d', 'currency · chases you · spend in the shop'],
+      ['buff_regen',   0.5,  'REGEN',      '#39ff88', '+6 hull per second for 6s'],
+      ['buff_shield',  0.5,  'SHIELD',     '#00f6ff', 'invulnerable for 4s'],
+      ['buff_bigshot', 0.5,  'BIG SHOT',   '#ff2d78', 'huge bullets, 2.5x damage, for 6s'],
+      ['buff_rapid',   0.5,  'RAPID FIRE', '#ffe14d', 'double fire rate for 6s'],
+      ['buff_assist',  0.5,  'ASSIST',     '#7dffca', 'drone wingman for 10s · boss waves only'],
     ].forEach(([tex, scale, name, color, desc], i) => {
       row(700, 168 + i * 56, tex, scale, name, color, desc, false);
     });
