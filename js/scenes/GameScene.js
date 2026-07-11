@@ -332,7 +332,7 @@ class GameScene extends Phaser.Scene {
     b.body.enable = true;
     b.setRotation(angle);
     const big = this.buffActive('bigshot');
-    b.setScale(big ? 2.4 : 1);
+    b.setScale(big ? 1.2 : 0.5); // texture is 2x; 0.5 = normal, 1.2 = big shot
     b.damage = big ? this.stats.bulletDamage * 2.5 : this.stats.bulletDamage;
     this.physics.velocityFromRotation(angle, PLAYER.bulletSpeed, b.body.velocity);
     b.diesAt = time + 1500;
@@ -343,6 +343,7 @@ class GameScene extends Phaser.Scene {
     const b = this.enemyBullets.get(x, y);
     if (!b) return;
     b.setActive(true).setVisible(true);
+    b.setScale(0.5); // 2x texture
     b.body.reset(x, y);
     b.body.enable = true;
     this.physics.velocityFromRotation(angle, speed, b.body.velocity);
@@ -692,7 +693,7 @@ class GameScene extends Phaser.Scene {
             b.setActive(true).setVisible(true);
             b.body.reset(this.drone.x, this.drone.y);
             b.body.enable = true;
-            b.setRotation(a).setScale(1);
+            b.setRotation(a).setScale(0.5);
             b.damage = this.stats.bulletDamage;
             this.physics.velocityFromRotation(a, PLAYER.bulletSpeed, b.body.velocity);
             b.diesAt = time + 1500;

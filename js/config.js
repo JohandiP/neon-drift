@@ -226,12 +226,19 @@ function makeTextures(scene) {
   }
   g.generateTexture('boss_hive', 220, 220); g.clear();
 
-  // Projectiles
-  g.fillStyle(0xffffff); g.fillRect(0, 0, 12, 4);
-  g.generateTexture('bullet', 12, 4); g.clear();
+  // Projectiles (M5 vector art, 2x textures shown at 0.5 scale)
+  // Player bullet: white-hot head with a cyan tail streak (points right)
+  g.fillStyle(0x00f6ff, 0.35); g.fillRect(0, 2, 12, 4);
+  g.fillStyle(0x9ffcff, 0.9); g.fillRect(8, 1.5, 10, 5);
+  g.fillStyle(0xffffff, 1); g.fillCircle(20, 4, 3.5);
+  g.generateTexture('bullet', 24, 8); g.clear();
 
-  g.fillStyle(0xff4444); g.fillCircle(5, 5, 5);
-  g.generateTexture('enemyBullet', 10, 10); g.clear();
+  // Enemy bullet: dark orb in a hot red ring
+  g.fillStyle(0xff4444, 0.25); g.fillCircle(10, 10, 9.5);
+  g.fillStyle(0x101322, 1); g.fillCircle(10, 10, 7);
+  g.lineStyle(2, 0xff4444, 1); g.strokeCircle(10, 10, 7);
+  g.fillStyle(0xffb3b3, 0.95); g.fillCircle(10, 10, 2.5);
+  g.generateTexture('enemyBullet', 20, 20); g.clear();
 
   // Core pickup: yellow diamond
   g.fillStyle(0xffe14d);
@@ -257,9 +264,9 @@ function makeTextures(scene) {
     g.generateTexture('buff_' + key, 22, 22); g.clear();
   });
 
-  // Particle
-  g.fillStyle(0xffffff); g.fillRect(0, 0, 5, 5);
-  g.generateTexture('particle', 5, 5);
+  // Particle: soft round spark
+  g.fillStyle(0xffffff); g.fillCircle(3, 3, 3);
+  g.generateTexture('particle', 6, 6);
 
   g.destroy();
 }
