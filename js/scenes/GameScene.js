@@ -342,6 +342,9 @@ class GameScene extends Phaser.Scene {
     enemy.hp -= bullet.damage || PLAYER.bulletDamage;
     enemy.setTintFill(0xffffff);
     enemy.flashUntil = this.time.now + 60; // cleared in update — no timer alloc per hit
+    // Impact sparks: point-blank shots die within a frame or two of travel,
+    // so without this the gun looks jammed when the ship is swarmed.
+    this.burst.explode(3, bullet.x, bullet.y);
     if (enemy.hp <= 0) this.killEnemy(enemy);
   }
 
