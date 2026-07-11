@@ -422,16 +422,17 @@ function drawShipTexture(g, key, spec, color) {
   g.clear();
 }
 
-// Arena background (M5): nebula clouds + starfield + the classic grid, all in
-// the theme's palette. Rendered once into a cached texture per theme (one
-// draw call at runtime) and placed at depth -10 so gameplay renders above it.
-// Menu screens use theme 0.
+// Arena background (M5): nebula clouds, two drifting parallax star layers,
+// and the classic grid on top, all in the theme's palette. Textures are
+// cached per theme; the star layers are seamless tiles scrolled per frame
+// (far = slow and dim, near = faster and brighter). Depth -10; gameplay
+// renders above. Menu screens use theme 0.
 function drawBackground(scene, themeIndex) {
   const idx = themeIndex || 0;
   const theme = THEMES[idx];
   scene.cameras.main.setBackgroundColor(theme.bg);
-  const key = 'bg_' + idx;
-  if (!scene.textures.exists(key)) {
+
+  if (!scene.textures.exists('bgneb_' + idx)) {
     const g = scene.make.graphics({ add: false });
     for (let i = 0; i < 5; i++) {
       const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
@@ -439,19 +440,48 @@ function drawBackground(scene, themeIndex) {
       g.fillStyle(theme.nebula, 0.05); g.fillCircle(x, y, r);
       g.fillStyle(theme.nebula, 0.04); g.fillCircle(x, y, r * 0.6);
     }
-    for (let i = 0; i < 110; i++) {
-      const x = Math.random() * GAME_WIDTH, y = Math.random() * GAME_HEIGHT;
-      const bright = Math.random() > 0.92;
-      g.fillStyle(bright ? 0xffffff : theme.star, 0.15 + Math.random() * 0.45);
-      g.fillCircle(x, y, bright ? 1.6 : 0.6 + Math.random() * 0.9);
+    g.generateTexture('bgneb_' + idx, GAME_WIDTH, GAME_HEIGHT);
+    g.clear();
+    // Seamless star tiles (stars kept off the edges so none get cut)
+    for (let i = 0; i < 8; i++) {
+      g.fillStyle(theme.star, 0.15 + Math.random() * 0.2);
+      g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.5 + Math.random() * 0.6);
     }
+    g.generateTexture('starsfar_' + idx, 256, 256);
+    g.clear();
+    for (let i = 0; i < 3; i++) {
+      g.fillStyle(theme.star, 0.3 + Math.random() * 0.3);
+      g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 0.9 + Math.random() * 0.7);
+    }
+    g.fillStyle(0xffffff, 0.85);
+    g.fillCircle(6 + Math.random() * 244, 6 + Math.random() * 244, 1.5);
+    g.generateTexture('starsnear_' + idx, 256, 256);
+    g.clear();
     g.lineStyle(1, theme.grid, 0.5);
-    for (let x = 0; x <= GAME_WIDTH; x += 64) { g.lineBetween(x, 0, x, GAME_HEIGHT); }
-    for (let y = 0; y <= GAME_HEIGHT; y += 64) { g.lineBetween(0, y, GAME_WIDTH, y); }
-    g.generateTexture(key, GAME_WIDTH, GAME_HEIGHT);
+    g.lineBetween(0, 0, 0, 64);
+    g.lineBetween(0, 0, 64, 0);
+    g.generateTexture('gridtile_' + idx, 64, 64);
     g.destroy();
   }
-  return scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, key).setDepth(-10);
+
+  const cx = GAME_WIDTH / 2, cy = GAME_HEIGHT / 2;
+  const neb = scene.add.image(cx, cy, 'bgneb_' + idx);
+  const far = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'starsfar_' + idx);
+  const near = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'starsnear_' + idx);
+  const grid = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'gridtile_' + idx);
+  const bg = scene.add.container(0, 0, [neb, far, near, grid]).setDepth(-10);
+
+  // Scroll the star layers; off-then-on so scene restarts don't stack handlers.
+  // A paused scene stops emitting update, so stars freeze with the game.
+  if (scene.__bgScroll) scene.events.off('update', scene.__bgScroll);
+  scene.__bgScroll = (time, delta) => {
+    far.tilePositionX += 0.006 * delta;
+    far.tilePositionY += 0.002 * delta;
+    near.tilePositionX += 0.018 * delta;
+    near.tilePositionY += 0.006 * delta;
+  };
+  scene.events.on('update', scene.__bgScroll);
+  return bg;
 }
 
 const FONT = { fontFamily: 'Courier New, monospace', color: '#e8faff' };
