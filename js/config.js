@@ -121,6 +121,10 @@ function playerStats(save) {
   s.maxSpeed = PLAYER.maxSpeed + (mods.speed || 0);
   s.driftMaxSpeed = PLAYER.driftMaxSpeed + (mods.speed || 0);
   s.dashInvulnMs = PLAYER.dashInvulnMs + (mods.dashInvuln || 0);
+  // Dash chaining must always leave a vulnerable window: i-frames are capped
+  // at 150ms less than the cooldown (maxed Phantom hit 450ms invuln on a
+  // 400ms cooldown = provably immortal).
+  s.dashInvulnMs = Math.min(s.dashInvulnMs, Math.max(100, s.dashCooldown * 1000 - 150));
   return s;
 }
 
