@@ -240,12 +240,15 @@ function makeTextures(scene) {
   g.closePath(); g.fillPath();
   g.generateTexture('core', 14, 14); g.clear();
 
-  // Assist drone: small mint wingman triangle
-  g.fillStyle(0x7dffca);
-  g.beginPath();
-  g.moveTo(22, 8); g.lineTo(0, 0); g.lineTo(5, 8); g.lineTo(0, 16);
-  g.closePath(); g.fillPath();
-  g.generateTexture('drone', 22, 16); g.clear();
+  // Assist drone: mint wingman in the ship style (2x, displayed at 0.5)
+  g.fillStyle(0x7dffca, 0.22); g.fillCircle(7, 16, 5);
+  g.fillStyle(0x7dffca, 0.5); g.fillCircle(7, 16, 2.5);
+  const dronePts = [[18,0],[0,-6],[-14,-7],[-18,-3],[-18,3],[-14,7],[0,6]];
+  g.fillStyle(0x101322); g.lineStyle(1.4, 0x7dffca, 1);
+  poly(dronePts, 24, 16, 1); g.fillPath(); g.strokePath();
+  g.fillStyle(0x7dffca, 0.2); poly(dronePts, 24, 16, 0.6); g.fillPath();
+  g.fillStyle(0xe4fff4, 0.95); g.fillCircle(30, 16, 2.2);
+  g.generateTexture('drone', 44, 32); g.clear();
 
   // Buff pickups: colored donuts
   Object.entries(BUFFS).forEach(([key, cfg]) => {

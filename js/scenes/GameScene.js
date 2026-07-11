@@ -59,7 +59,7 @@ class GameScene extends Phaser.Scene {
     this.activeBuffs = {}; // buff key -> expiry timestamp
 
     // Assist drone (boss-wave buff): orbits the player, fires at enemies.
-    this.drone = this.add.image(0, 0, 'drone').setVisible(false).setDepth(5);
+    this.drone = this.add.image(0, 0, 'drone').setScale(0.5).setVisible(false).setDepth(5);
     this.droneNextFire = 0;
 
     // Particles
