@@ -74,7 +74,10 @@ class MenuScene extends Phaser.Scene {
   }
 
   startGame() {
-    this.scene.start('Game');
+    // Explicit data: Phaser reuses the PREVIOUS start data when none is
+    // given, so after an attract demo a bare start('Game') would inherit
+    // { demo: true } and play another demo.
+    this.scene.start('Game', { demo: false });
   }
 
   onResetClick() {

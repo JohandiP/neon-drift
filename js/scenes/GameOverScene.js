@@ -28,12 +28,14 @@ class GameOverScene extends Phaser.Scene {
       btn.on('pointerover', () => btn.setColor('#00f6ff'));
       btn.on('pointerout', () => btn.setColor('#e8faff'));
     });
-    retry.on('pointerdown', () => this.scene.start('Game'));
+    // { demo: false } is required — a bare start('Game') would reuse stale
+    // demo data left behind by the menu's attract mode.
+    retry.on('pointerdown', () => this.scene.start('Game', { demo: false }));
     menu.on('pointerdown', () => this.scene.start('Menu'));
 
     neonText(this, cx, 610, 'R to retry · M for menu', 16, '#556077').setOrigin(0.5);
-    this.input.keyboard.on('keydown-R', () => this.scene.start('Game'));
-    this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Game'));
+    this.input.keyboard.on('keydown-R', () => this.scene.start('Game', { demo: false }));
+    this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Game', { demo: false }));
     this.input.keyboard.on('keydown-M', () => this.scene.start('Menu'));
   }
 }
