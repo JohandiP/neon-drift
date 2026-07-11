@@ -323,8 +323,9 @@ class GameScene extends Phaser.Scene {
   }
 
   fireBullet(time) {
-    const aim = this.aimTarget();
-    const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y);
+    // Fire along the ship's actual facing (which chases the aim at turnRate),
+    // so shots always leave the nose/barrels — never sideways mid-turn.
+    const angle = this.player.rotation;
     const b = this.bullets.get(this.player.x, this.player.y);
     if (!b) return;
     // Ships with twin barrels (Vulcan) alternate shots between them; the
@@ -611,9 +612,12 @@ class GameScene extends Phaser.Scene {
     }
     this.player.setAlpha(time < this.invulnUntil ? 0.5 : (drifting ? 0.85 : 1));
 
-    // Aim at the mouse (or the pilot's virtual cursor in demo mode)
+    // Rotate toward the aim (mouse or demo pilot) at a finite turn rate,
+    // shortest path — no more instant snap when the pointer jumps (e.g.
+    // moving the mouse while paused).
     const aim = this.aimTarget();
-    this.player.setRotation(Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y));
+    const targetAngle = Phaser.Math.Angle.Between(this.player.x, this.player.y, aim.x, aim.y);
+    this.player.rotation = Phaser.Math.Angle.RotateTo(this.player.rotation, targetAngle, PLAYER.turnRate * dt);
 
     // Engine trail while under way (denser during a dash)
     if (this.player.body.velocity.length() > 60 && time >= this.trailNextAt) {

@@ -20,6 +20,7 @@ const PLAYER = {
   ramDamage: 15, // dealt to an enemy when its contact damage actually lands on you
   driftBuildRadius: 170,  // must be this close to an enemy while drifting
   maxMultiplier: 8,
+  turnRate: 14, // rad/s toward the aim — smooths pause-resume snaps; fast enough to be invisible in normal play
 };
 
 const ENEMIES = {
