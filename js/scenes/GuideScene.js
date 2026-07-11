@@ -23,11 +23,11 @@ class GuideScene extends Phaser.Scene {
     // --- Enemies (left column) ---
     neonText(this, 110, 112, 'ENEMIES', 22, '#ff2d78');
     [
-      ['chaser',   1,    'CHASER',   '#ff2d78', '20 HP · rushes straight at you'],
-      ['mini',     1,    'MINI',     '#ff6da8', '10 HP · fast fragment of a splitter'],
-      ['shooter',  1,    'SHOOTER',  '#ffaa22', '30 HP · keeps its distance and fires at you'],
-      ['splitter', 1,    'SPLITTER', '#39ff88', '40 HP · splits into two minis when killed'],
-      ['boss',     0.48, 'BOSS',     '#bb44ff', 'every 5th wave · 3 kinds rotate: burst / charger / mini-spawner'],
+      ['chaser',   0.5,  'CHASER',   '#ff2d78', '20 HP · rushes straight at you'],
+      ['mini',     0.5,  'MINI',     '#ff6da8', '10 HP · fast fragment of a splitter'],
+      ['shooter',  0.5,  'SHOOTER',  '#ffaa22', '30 HP · keeps its distance and fires at you'],
+      ['splitter', 0.5,  'SPLITTER', '#39ff88', '40 HP · splits into two minis when killed'],
+      ['boss',     0.24, 'BOSS',     '#bb44ff', 'every 5th wave · 3 kinds rotate: burst / charger / mini-spawner'],
     ].forEach(([tex, scale, name, color, desc], i) => {
       row(140, 172 + i * 64, tex, scale, name, color, desc, true);
     });

@@ -140,41 +140,91 @@ function makeTextures(scene) {
   Object.entries(SHIPS).forEach(([key, s]) => drawShipTexture(g, 'ship_' + key, SHIP_ART[key], s.color));
   drawShipTexture(g, 'ship', SHIP_ART.viper, SHIPS.viper.color);
 
-  // Enemies
-  g.fillStyle(ENEMIES.chaser.tint); g.fillRect(0, 0, 26, 26);
-  g.generateTexture('chaser', 26, 26); g.clear();
+  // Enemies (M5 vector art): same silhouettes and colors as the old flat
+  // shapes, drawn at 2x with the ship treatment — dark body, neon edge,
+  // translucent panel, pale core. Sprites display at 0.5 scale.
+  const poly = (pts, px, py, k) => {
+    g.beginPath();
+    g.moveTo(px + pts[0][0] * k, py + pts[0][1] * k);
+    for (let i = 1; i < pts.length; i++) g.lineTo(px + pts[i][0] * k, py + pts[i][1] * k);
+    g.closePath();
+  };
 
-  g.fillStyle(ENEMIES.mini.tint); g.fillRect(0, 0, 16, 16);
-  g.generateTexture('mini', 16, 16); g.clear();
+  // Chaser: four-point shuriken
+  const chaserPts = [[0,-24],[7,-7],[24,0],[7,7],[0,24],[-7,7],[-24,0],[-7,-7]];
+  g.fillStyle(0x101322); g.lineStyle(2, ENEMIES.chaser.tint, 1);
+  poly(chaserPts, 26, 26, 1); g.fillPath(); g.strokePath();
+  g.fillStyle(ENEMIES.chaser.tint, 0.18); poly(chaserPts, 26, 26, 0.55); g.fillPath();
+  g.fillStyle(0xffc2d6, 0.95); g.fillCircle(26, 26, 3.5);
+  g.generateTexture('chaser', 52, 52); g.clear();
 
-  g.fillStyle(ENEMIES.shooter.tint);
-  g.beginPath();
-  g.moveTo(14, 0); g.lineTo(28, 14); g.lineTo(14, 28); g.lineTo(0, 14);
-  g.closePath(); g.fillPath();
-  g.generateTexture('shooter', 28, 28); g.clear();
+  // Mini: small shard
+  const miniPts = [[0,-14],[5,-5],[14,0],[5,5],[0,14],[-5,5],[-14,0],[-5,-5]];
+  g.fillStyle(0x101322); g.lineStyle(1.6, ENEMIES.mini.tint, 1);
+  poly(miniPts, 16, 16, 1); g.fillPath(); g.strokePath();
+  g.fillStyle(0xffd3e2, 0.95); g.fillCircle(16, 16, 2.5);
+  g.generateTexture('mini', 32, 32); g.clear();
 
-  g.fillStyle(ENEMIES.splitter.tint); g.fillCircle(17, 17, 17);
-  g.generateTexture('splitter', 34, 34); g.clear();
-
-  g.fillStyle(ENEMIES.boss.tint); g.fillCircle(48, 48, 48);
-  g.fillStyle(0x05050d); g.fillCircle(48, 48, 20);
-  g.generateTexture('boss', 96, 96); g.clear();
-
-  // Lancer boss: red ring with a spear-like core
-  g.fillStyle(0xff3344); g.fillCircle(40, 40, 40);
-  g.fillStyle(0x05050d); g.fillCircle(40, 40, 22);
-  g.fillStyle(0xff3344); g.fillRect(36, 8, 8, 64);
-  g.generateTexture('boss_lancer', 80, 80); g.clear();
-
-  // Hive boss: green ring with cell dots
-  g.fillStyle(0x2fe06b); g.fillCircle(55, 55, 55);
-  g.fillStyle(0x05050d); g.fillCircle(55, 55, 26);
-  g.fillStyle(0x05050d);
+  // Shooter: hex turret with a targeting eye
+  const hexPts = [];
   for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2;
-    g.fillCircle(55 + Math.cos(a) * 40, 55 + Math.sin(a) * 40, 7);
+    const a = Math.PI / 6 + i * Math.PI / 3;
+    hexPts.push([Math.cos(a) * 25, Math.sin(a) * 25]);
   }
-  g.generateTexture('boss_hive', 110, 110); g.clear();
+  g.fillStyle(0x101322); g.lineStyle(2, ENEMIES.shooter.tint, 1);
+  poly(hexPts, 28, 28, 1); g.fillPath(); g.strokePath();
+  g.fillStyle(ENEMIES.shooter.tint, 0.16); poly(hexPts, 28, 28, 0.62); g.fillPath();
+  g.lineStyle(1.5, ENEMIES.shooter.tint, 0.8); g.strokeCircle(28, 28, 10);
+  g.fillStyle(0xffe2b8, 0.95); g.fillCircle(28, 28, 4);
+  g.generateTexture('shooter', 56, 56); g.clear();
+
+  // Splitter: cell with two nuclei (it splits in two)
+  g.fillStyle(0x101322); g.lineStyle(2, ENEMIES.splitter.tint, 1);
+  g.fillCircle(34, 34, 31); g.strokeCircle(34, 34, 31);
+  g.fillStyle(ENEMIES.splitter.tint, 0.14); g.fillCircle(34, 34, 24);
+  g.lineStyle(1.2, ENEMIES.splitter.tint, 0.5); g.lineBetween(34, 10, 34, 58);
+  g.fillStyle(0xd9ffe9, 0.95); g.fillCircle(24, 34, 5); g.fillCircle(44, 34, 5);
+  g.generateTexture('splitter', 68, 68); g.clear();
+
+  // Warden boss: ring with 12 spokes, one per burst bullet
+  g.fillStyle(0x101322); g.lineStyle(3, ENEMIES.boss.tint, 1);
+  g.fillCircle(96, 96, 92); g.strokeCircle(96, 96, 92);
+  g.fillStyle(ENEMIES.boss.tint, 0.12); g.fillCircle(96, 96, 76);
+  g.lineStyle(2, ENEMIES.boss.tint, 0.7);
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6;
+    g.lineBetween(96 + Math.cos(a) * 46, 96 + Math.sin(a) * 46, 96 + Math.cos(a) * 72, 96 + Math.sin(a) * 72);
+  }
+  g.fillStyle(0x05050d); g.fillCircle(96, 96, 38);
+  g.lineStyle(2.5, ENEMIES.boss.tint, 1); g.strokeCircle(96, 96, 38);
+  g.fillStyle(0xe6ccff, 0.9); g.fillCircle(96, 96, 8);
+  g.generateTexture('boss', 192, 192); g.clear();
+
+  // Lancer boss: red ring impaled by its charge spear
+  g.fillStyle(0x101322); g.lineStyle(3, 0xff3344, 1);
+  g.fillCircle(80, 80, 74); g.strokeCircle(80, 80, 74);
+  g.fillStyle(0xff3344, 0.12); g.fillCircle(80, 80, 60);
+  g.fillStyle(0x05050d); g.fillCircle(80, 80, 36);
+  g.lineStyle(2.5, 0xff3344, 1); g.strokeCircle(80, 80, 36);
+  g.fillStyle(0x101322); g.fillRect(72, 8, 16, 144);
+  g.lineStyle(2, 0xff3344, 1); g.strokeRect(72, 8, 16, 144);
+  g.fillStyle(0xffc9cf, 0.9); g.fillRect(74, 8, 12, 10); g.fillRect(74, 142, 12, 10);
+  g.generateTexture('boss_lancer', 160, 160); g.clear();
+
+  // Hive boss: brood ring with egg pods (mini-pink cores)
+  g.fillStyle(0x101322); g.lineStyle(3, 0x2fe06b, 1);
+  g.fillCircle(110, 110, 104); g.strokeCircle(110, 110, 104);
+  g.fillStyle(0x2fe06b, 0.10); g.fillCircle(110, 110, 88);
+  g.fillStyle(0x05050d); g.fillCircle(110, 110, 46);
+  g.lineStyle(2.5, 0x2fe06b, 1); g.strokeCircle(110, 110, 46);
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3;
+    const ex = 110 + Math.cos(a) * 72, ey = 110 + Math.sin(a) * 72;
+    g.fillStyle(0x05050d); g.fillCircle(ex, ey, 13);
+    g.lineStyle(1.8, 0x2fe06b, 1); g.strokeCircle(ex, ey, 13);
+    g.fillStyle(0xffd3e2, 0.9); g.fillCircle(ex, ey, 4.5);
+  }
+  g.generateTexture('boss_hive', 220, 220); g.clear();
 
   // Projectiles
   g.fillStyle(0xffffff); g.fillRect(0, 0, 12, 4);

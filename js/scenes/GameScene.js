@@ -246,6 +246,7 @@ class GameScene extends Phaser.Scene {
     const e = this.enemies.get(pos.x, pos.y);
     if (!e) return null;
     e.setTexture(bcfg ? bcfg.tex : type);
+    e.setScale(0.5); // enemy textures are drawn at 2x for crisp vector edges
     e.setActive(true).setVisible(true);
     e.clearTint();
     e.setAlpha(1);
@@ -268,7 +269,7 @@ class GameScene extends Phaser.Scene {
     e.wanderPhase = Phaser.Math.FloatBetween(0, Math.PI * 2);
     e.wanderFreq = Phaser.Math.FloatBetween(1.2, 2.4);
     e.wanderAmp = { chaser: 0.65, mini: 0.85, splitter: 0.4, shooter: 0.35, boss: 0.12 }[type];
-    e.body.setCircle((bcfg ? bcfg.size : cfg.size) / 2);
+    e.body.setCircle(bcfg ? bcfg.size : cfg.size); // texture px; halved by sprite scale
     e.nextShotAt = this.time.now + Phaser.Math.Between(1200, 2400);
     if (type === 'boss') {
       this.bossBar.setVisible(true);
