@@ -13,7 +13,9 @@ All numbers below are the live tuning values from [`js/config.js`](../js/config.
 | Pause | ESC or P | |
 
 All keys except pause are remappable in **CONTROLS** (menu). Duplicate
-assignments swap automatically; bindings persist in the save.
+assignments swap automatically; bindings persist in the save. The same screen
+holds the FPS display toggle and the SFX / music volume controls (all sound is
+synthesized at runtime — the game ships no audio files).
 
 ## The ship
 

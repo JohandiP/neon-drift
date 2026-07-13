@@ -48,8 +48,9 @@ python3 -m http.server 8000
 - `js/scenes/` — menu, game, shop, pause, controls, guide, game-over
 - `js/save.js` — localStorage save management
 
-Art is intentionally placeholder neon shapes for now; an AI-generated art pass
-is planned (see the design doc's milestone plan).
+All art is layered neon vector work generated in code at boot, and all audio
+(SFX and the synthwave music loop) is synthesized with the Web Audio API at
+runtime — the game ships zero image or sound files.
 
 ## License
 
