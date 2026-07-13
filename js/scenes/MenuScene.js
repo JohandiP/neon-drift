@@ -4,6 +4,8 @@ class MenuScene extends Phaser.Scene {
   create() {
     makeTextures(this);
     const save = SaveManager.load();
+    AudioFX.init(this.game, save);
+    AudioFX.startMusic();
     const cx = GAME_WIDTH / 2;
 
     drawBackground(this);
@@ -36,7 +38,7 @@ class MenuScene extends Phaser.Scene {
       btn.setInteractive({ useHandCursor: true });
       btn.on('pointerover', () => btn.setColor('#00f6ff'));
       btn.on('pointerout', () => btn.setColor('#e8faff'));
-      btn.on('pointerdown', () => this.scene.start(scene));
+      btn.on('pointerdown', () => { AudioFX.play('ui'); this.scene.start(scene); });
     });
 
     const c = save.controls;
@@ -74,6 +76,7 @@ class MenuScene extends Phaser.Scene {
   }
 
   startGame() {
+    AudioFX.play('ui');
     // Explicit data: Phaser reuses the PREVIOUS start data when none is
     // given, so after an attract demo a bare start('Game') would inherit
     // { demo: true } and play another demo.

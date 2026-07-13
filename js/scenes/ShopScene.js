@@ -77,6 +77,7 @@ class ShopScene extends Phaser.Scene {
 
   buy(key) {
     if (!this.canBuy(key)) return;
+    AudioFX.play('ui');
     this.save.totalCores -= this.costOf(key);
     this.save.upgrades[key]++;
     SaveManager.save(this.save);

@@ -68,6 +68,7 @@ class GarageScene extends Phaser.Scene {
     } else {
       return;
     }
+    AudioFX.play('ui');
     SaveManager.save(this.save);
     this.refresh();
   }

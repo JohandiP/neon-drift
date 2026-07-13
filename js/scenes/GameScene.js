@@ -21,6 +21,8 @@ class GameScene extends Phaser.Scene {
     }
     this.runStartHigh = this.save.highScore;
     this.stats = playerStats(this.save);
+    AudioFX.init(this.game, this.save);
+    AudioFX.startMusic();
     const resume = (!this.demoMode && data && data.resume && this.save.pendingRun) ? this.save.pendingRun : null;
 
     // Run state (restored from the wave-start checkpoint when resuming)
@@ -275,6 +277,7 @@ class GameScene extends Phaser.Scene {
       this.bossBar.setVisible(true);
       this.bossBarBg.setVisible(true);
       this.activeBoss = e;
+      AudioFX.play('bossSpawn');
     }
     return e;
   }
@@ -291,6 +294,7 @@ class GameScene extends Phaser.Scene {
     this.score += bonus;
     this.hull = Math.min(this.stats.maxHull, this.hull + WAVES.clearHeal);
     this.showBanner(`WAVE CLEAR  +${bonus.toLocaleString()}`);
+    AudioFX.play('waveClear');
     this.updateHUD();
     this.time.delayedCall(1100, () => {
       if (this.gameEnded) return;
@@ -348,6 +352,7 @@ class GameScene extends Phaser.Scene {
     this.physics.velocityFromRotation(angle, PLAYER.bulletSpeed, b.body.velocity);
     b.diesAt = time + 1500;
     this.nextFireAt = time + 1000 / (this.stats.fireRate * (this.buffActive('rapid') ? 2 : 1));
+    AudioFX.play('fire');
   }
 
   fireEnemyBullet(x, y, angle, speed) {
@@ -375,6 +380,7 @@ class GameScene extends Phaser.Scene {
     // Impact sparks: point-blank shots die within a frame or two of travel,
     // so without this the gun looks jammed when the ship is swarmed.
     this.burst.explode(3, bullet.x, bullet.y);
+    AudioFX.play('hit');
     if (enemy.hp <= 0) this.killEnemy(enemy);
   }
 
@@ -383,6 +389,7 @@ class GameScene extends Phaser.Scene {
     this.score += WAVES.killScore * this.multiplier;
     this.burst.explode(enemy.enemyType === 'boss' ? 46 : 14, x, y);
     this.cameras.main.shake(enemy.enemyType === 'boss' ? 250 : 90, enemy.enemyType === 'boss' ? 0.012 : 0.0035);
+    AudioFX.play(enemy.enemyType === 'boss' ? 'bossExplode' : 'explode');
 
     if (enemy.enemyType === 'splitter') {
       this.spawnEnemy('mini', x - 14, y);
@@ -436,6 +443,7 @@ class GameScene extends Phaser.Scene {
       current + cfg.duration * 1000,
       now + cfg.maxDuration * 1000
     );
+    AudioFX.play('buff');
     const label = neonText(this, pickup.x, pickup.y - 12, cfg.name, 18,
       '#' + cfg.color.toString(16).padStart(6, '0')).setOrigin(0.5).setDepth(15);
     this.tweens.add({ targets: label, y: label.y - 40, alpha: 0, duration: 900, onComplete: () => label.destroy() });
@@ -452,6 +460,7 @@ class GameScene extends Phaser.Scene {
     core.body.enable = false;
     this.coresEarned++;
     this.save.totalCores++;
+    AudioFX.play('core');
     this.updateHUD();
   }
 
@@ -479,6 +488,7 @@ class GameScene extends Phaser.Scene {
     const now = this.time.now;
     if (this.buffActive('shield') || now < this.invulnUntil || this.gameEnded) return false;
     this.invulnUntil = now + PLAYER.hitInvulnMs;
+    AudioFX.play('playerHit');
     this.hull -= amount;
     this.multiplier = 1;
     this.driftHeat = 0;
@@ -498,6 +508,7 @@ class GameScene extends Phaser.Scene {
     this.player.setVisible(false);
     this.player.body.enable = false;
     this.drone.setVisible(false);
+    AudioFX.play('gameOver');
 
     const isNewHigh = this.score > this.runStartHigh;
     this.save.pendingRun = null; // the run is over — nothing to resume
@@ -640,6 +651,7 @@ class GameScene extends Phaser.Scene {
       this.physics.velocityFromRotation(dashAngle, PLAYER.dashSpeed, this.player.body.velocity);
       this.burst.explode(10, this.player.x, this.player.y);
       this.cameras.main.shake(80, 0.003);
+      AudioFX.play('dash');
     }
     this.hudDash.setText(time >= this.dashReadyAt ? 'DASH READY' : 'DASH …');
     this.hudDash.setColor(time >= this.dashReadyAt ? '#00f6ff' : '#556077');
