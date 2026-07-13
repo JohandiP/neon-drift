@@ -458,10 +458,10 @@ function drawBackground(scene, themeIndex) {
       g.fillCircle(6 + Math.random() * (GAME_WIDTH - 12), 6 + Math.random() * (GAME_HEIGHT - 12), rMin + Math.random() * rVar);
     }
   };
-  starLayer('deep', 45, 0.08, 0.12, 0.4, 0.4);
+  starLayer('deep', 45, 0.22, 0.15, 0.6, 0.5);
   g.generateTexture('starsdeep_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
-  starLayer('far', 30, 0.15, 0.2, 0.5, 0.6);
+  starLayer('far', 30, 0.3, 0.25, 0.7, 0.7);
   g.generateTexture('starsfar_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
   starLayer('near', 12, 0.45, 0.3, 1.2, 1.0);
