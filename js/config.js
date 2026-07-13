@@ -464,10 +464,10 @@ function drawBackground(scene, themeIndex) {
   starLayer('far', 30, 0.15, 0.2, 0.5, 0.6);
   g.generateTexture('starsfar_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
-  starLayer('near', 12, 0.3, 0.3, 0.9, 0.7);
-  g.fillStyle(0xffffff, 0.85);
+  starLayer('near', 12, 0.45, 0.3, 1.2, 1.0);
+  g.fillStyle(0xffffff, 0.9);
   for (let i = 0; i < 3; i++) {
-    g.fillCircle(6 + Math.random() * (GAME_WIDTH - 12), 6 + Math.random() * (GAME_HEIGHT - 12), 1.5);
+    g.fillCircle(6 + Math.random() * (GAME_WIDTH - 12), 6 + Math.random() * (GAME_HEIGHT - 12), 1.9);
   }
   g.generateTexture('starsnear_' + idx, GAME_WIDTH, GAME_HEIGHT);
   g.clear();
@@ -487,17 +487,18 @@ function drawBackground(scene, themeIndex) {
   const grid = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'gridtile_' + idx);
   const bg = scene.add.container(0, 0, [neb, deep, far, near, grid]).setDepth(-10);
 
-  // Scroll the star layers at a 1:3:9 depth ratio; off-then-on so scene
-  // restarts don't stack handlers. Paused scenes stop emitting update, so
-  // the stars freeze with the game.
+  // Scroll the star layers at a 1:4:14 depth ratio (2 / 8 / 28 px/s) — wide
+  // enough that the depth separation is visible, not just measurable.
+  // Off-then-on so scene restarts don't stack handlers; paused scenes stop
+  // emitting update, so the stars freeze with the game.
   if (scene.__bgScroll) scene.events.off('update', scene.__bgScroll);
   scene.__bgScroll = (time, delta) => {
     deep.tilePositionX += 0.002 * delta;
     deep.tilePositionY += 0.0007 * delta;
-    far.tilePositionX += 0.006 * delta;
-    far.tilePositionY += 0.002 * delta;
-    near.tilePositionX += 0.018 * delta;
-    near.tilePositionY += 0.006 * delta;
+    far.tilePositionX += 0.008 * delta;
+    far.tilePositionY += 0.0027 * delta;
+    near.tilePositionX += 0.028 * delta;
+    near.tilePositionY += 0.0093 * delta;
   };
   scene.events.on('update', scene.__bgScroll);
   return bg;
