@@ -31,7 +31,31 @@ class ControlsScene extends Phaser.Scene {
     neonText(this, cx + 230, yAim, 'MOUSE (AUTO-FIRE)', 22, '#556077').setOrigin(1, 0.5);
     neonText(this, cx - 230, yAim + 30, 'arrow keys always work as alternate movement', 14, '#556077').setOrigin(0, 0.5);
 
-    this.fpsToggle = neonText(this, cx, 600, '', 20).setOrigin(0.5);
+    // Volume rows: click to cycle 0% → 20% → ... → 100% → 0%. The SFX row
+    // plays a blip on change as an instant preview.
+    const volumeRow = (y, label, field) => {
+      const row = neonText(this, cx, y, '', 18).setOrigin(0.5);
+      row.setInteractive({ useHandCursor: true });
+      const refresh = () => {
+        const pct = Math.round((this.save[field] || 0) * 100);
+        row.setText(`[ ${label}: ${pct}% ]`).setColor(pct === 0 ? '#556077' : '#e8faff');
+      };
+      row.on('pointerover', () => row.setColor('#00f6ff'));
+      row.on('pointerout', refresh);
+      row.on('pointerdown', () => {
+        this.save[field] = Math.round(((this.save[field] + 0.2) % 1.2) * 10) / 10;
+        SaveManager.save(this.save);
+        AudioFX.init(this.game, this.save);
+        AudioFX.applyVolumes(this.save);
+        if (field === 'sfxVolume') AudioFX.play('ui');
+        refresh();
+      });
+      refresh();
+    };
+    volumeRow(578, 'SFX VOLUME', 'sfxVolume');
+    volumeRow(608, 'MUSIC VOLUME', 'musicVolume');
+
+    this.fpsToggle = neonText(this, cx, 638, '', 20).setOrigin(0.5);
     this.fpsToggle.setInteractive({ useHandCursor: true });
     this.fpsToggle.on('pointerover', () => this.fpsToggle.setColor('#00f6ff'));
     this.fpsToggle.on('pointerout', () => this.refreshFps());
@@ -42,8 +66,8 @@ class ControlsScene extends Phaser.Scene {
     });
     this.refreshFps();
 
-    const reset = neonText(this, cx - 140, 655, '[ RESET ]', 26).setOrigin(0.5);
-    const back = neonText(this, cx + 140, 655, '[ BACK ]', 26).setOrigin(0.5);
+    const reset = neonText(this, cx - 140, 682, '[ RESET ]', 24).setOrigin(0.5);
+    const back = neonText(this, cx + 140, 682, '[ BACK ]', 24).setOrigin(0.5);
     [reset, back].forEach(b => {
       b.setInteractive({ useHandCursor: true });
       b.on('pointerover', () => b.setColor('#00f6ff'));
