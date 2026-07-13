@@ -11,6 +11,8 @@ const SaveManager = {
       selectedShip: 'viper',
       unlockedShips: ['viper'],
       showFps: false,
+      sfxVolume: 0.8,
+      musicVolume: 0.5,
       controls: JSON.parse(JSON.stringify(DEFAULT_CONTROLS)),
       // Wave-start checkpoint of the current run; null when no run to resume.
       pendingRun: null,
