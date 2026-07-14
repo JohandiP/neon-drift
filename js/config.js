@@ -33,6 +33,9 @@ const ENEMIES = {
 
 const WAVES = {
   enemySpeedRampPerWave: 0.05, // +5% enemy speed per wave
+  enemySpeedRampCap: 1.6,      // cap the ramp at +160% (2.6x) so deep waves stay
+                               // skill-bound (dense, dodge-heavy) instead of
+                               // physics-impossible — reached at wave 33
   shooterUnlockWave: 3,
   splitterUnlockWave: 6,
   bossEveryNWaves: 5,

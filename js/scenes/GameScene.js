@@ -264,7 +264,8 @@ class GameScene extends Phaser.Scene {
     e.maxHp = e.hp;
     e.damage = cfg.damage;
     e.coreDrop = cfg.cores;
-    e.speed = (bcfg ? bcfg.speed : cfg.speed) * (1 + WAVES.enemySpeedRampPerWave * (this.wave - 1));
+    e.speed = (bcfg ? bcfg.speed : cfg.speed) *
+      (1 + Math.min(WAVES.enemySpeedRampPerWave * (this.wave - 1), WAVES.enemySpeedRampCap));
     // Per-enemy variation so packs spread out instead of merging into one blob:
     // individual speed, plus a sinusoidal wander applied to the homing angle.
     e.speed *= Phaser.Math.FloatBetween(0.85, 1.15);
