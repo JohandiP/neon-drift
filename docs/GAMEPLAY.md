@@ -39,7 +39,7 @@ synthesized at runtime — the game ships no audio files).
 ## Ramming
 
 Colliding with an enemy hurts both sides: you take its contact damage and it
-takes **15** in return (enough to one-shot a mini). This only happens when the
+takes **20** in return (one-shots chasers and minis). This only happens when the
 hit actually lands on you — while shielded, dashing, or inside post-hit
 invulnerability frames, neither side takes anything, so invulnerable ramming
 can't be used as a weapon.
@@ -63,7 +63,9 @@ all gaining +30 HP per wave:
 | Lancer (red) | 260 | 70 | Charges at 480 px/s every ~4s; aimed 3-shot spread between charges |
 | Hive (green) | 340 | 45 | Spawns 2 minis every 4s; slow aimed shots |
 
-- Wave N spawns **N + 2** enemies; enemy speed ramps **+5% per wave**.
+- Wave N spawns **N + 2** enemies; enemy speed ramps **+5% per wave**, capped
+  at +160% (2.6× base) around wave 33 — deep waves get harder through density,
+  not runaway speed.
 - Shooters join the pool at wave 3, splitters at wave 6.
 - Enemies wander individually and push each other apart, so packs surround
   you instead of stacking into a blob.
