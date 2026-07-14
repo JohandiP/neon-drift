@@ -416,6 +416,12 @@ class GameScene extends Phaser.Scene {
       this.bossBar.setVisible(false);
       this.bossBarBg.setVisible(false);
       this.activeBoss = null;
+      // Hit-stop: freeze the field for a beat while the explosion blooms and
+      // the screen flashes. Physics pause stops bodies but leaves particles,
+      // tweens, and the clock running (so the resume timer still fires).
+      this.cameras.main.flash(180, 255, 255, 255);
+      this.physics.pause();
+      this.time.delayedCall(140, () => { if (!this.gameEnded) this.physics.resume(); });
     }
     for (let i = 0; i < enemy.coreDrop; i++) {
       const c = this.cores.get(x + Phaser.Math.Between(-18, 18), y + Phaser.Math.Between(-18, 18));
