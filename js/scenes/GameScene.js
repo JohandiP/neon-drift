@@ -153,6 +153,11 @@ class GameScene extends Phaser.Scene {
     this.waveBanner = neonText(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 120, '', 52, '#ff2d78')
       .setOrigin(0.5).setDepth(d).setAlpha(0);
 
+    // Low-hull danger tint: pulses over the arena (below the HUD) when
+    // critical. Alpha driven in update so it stops when the game does.
+    this.dangerTint = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0xff2d78, 0)
+      .setDepth(d - 2);
+
     this.updateHUD();
   }
 
@@ -748,6 +753,15 @@ class GameScene extends Phaser.Scene {
 
     const shownHull = Math.ceil(this.hull);
     if (shownHull !== this.lastShownHull) { this.lastShownHull = shownHull; this.updateHUD(); }
+
+    // Danger tint pulses when hull is critical (< 25%), faster the lower it is.
+    const hullPct = this.hull / this.stats.maxHull;
+    if (hullPct < 0.25 && !this.gameEnded) {
+      const rate = 0.006 + (0.25 - hullPct) * 0.03;
+      this.dangerTint.setAlpha(0.10 + 0.07 * (0.5 + 0.5 * Math.sin(time * rate)));
+    } else if (this.dangerTint.alpha !== 0) {
+      this.dangerTint.setAlpha(0);
+    }
 
     if (this.save.showFps && time >= this.fpsNextUpdate) {
       this.fpsNextUpdate = time + 250;
