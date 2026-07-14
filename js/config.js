@@ -1,5 +1,5 @@
 // Tuning constants — all gameplay numbers live here (see design doc §3-4).
-const GAME_VERSION = 'v0.6.2'; // bumped with every update batch (vMAJOR.MINOR.PATCH)
+const GAME_VERSION = 'v0.6.3'; // bumped with every update batch (vMAJOR.MINOR.PATCH)
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 
