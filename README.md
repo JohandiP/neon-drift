@@ -4,8 +4,11 @@ A top-down neon arcade survival shooter. Pilot a hovercar through endless waves
 of enemies, drift close to build your score multiplier, and upgrade your ship
 between waves.
 
-**Zero install** — open `index.html` in any modern browser and play. No build
-step, no dependencies to fetch (Phaser 3.87 is bundled in `lib/`).
+**Play now:** https://johandip.github.io/neon-drift/
+
+**Zero install** — open the link above (or `index.html` locally) in any modern
+browser and play. No build step, no dependencies to fetch (Phaser 3.87 is
+bundled in `lib/`).
 
 ## How to play
 
