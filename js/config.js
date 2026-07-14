@@ -48,17 +48,18 @@ const WAVES = {
 const UPGRADE_COSTS = [100, 250, 500, 1000];
 
 // Ships (M4): unlocked permanently with cores in the garage. `mods` adjust the
-// base PLAYER stats after upgrades are applied.
+// base PLAYER stats after upgrades are applied. Costs double per tier
+// (300 → 600 → 1200 → 2400) so unlocking the roster is a long-term goal.
 const SHIPS = {
-  viper:   { name: 'VIPER',   cost: 0,   color: 0x00f6ff, desc: 'balanced all-rounder',
+  viper:   { name: 'VIPER',   cost: 0,    color: 0x00f6ff, desc: 'balanced all-rounder',
              mods: {} },
-  bastion: { name: 'BASTION', cost: 300, color: 0x39ff88, desc: 'armored, but slower',
+  bastion: { name: 'BASTION', cost: 300,  color: 0x39ff88, desc: 'armored, but slower',
              mods: { hull: 50, speed: -40 } },
-  dart:    { name: 'DART',    cost: 300, color: 0xffe14d, desc: 'fast and fragile',
+  dart:    { name: 'DART',    cost: 600,  color: 0xffe14d, desc: 'fast and fragile',
              mods: { hull: -25, speed: 45 } },
-  vulcan:  { name: 'VULCAN',  cost: 600, color: 0xffaa22, desc: 'extra guns, thin armor',
+  vulcan:  { name: 'VULCAN',  cost: 1200, color: 0xffaa22, desc: 'extra guns, thin armor',
              mods: { hull: -15, fireRate: 2 }, barrelOffset: 6 }, // alternating twin barrels
-  phantom: { name: 'PHANTOM', cost: 900, color: 0xbb44ff, desc: 'dash master',
+  phantom: { name: 'PHANTOM', cost: 2400, color: 0xbb44ff, desc: 'dash master',
              mods: { hull: -15, dashCooldown: -0.5, dashInvuln: 150 } },
 };
 
