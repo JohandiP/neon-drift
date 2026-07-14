@@ -17,7 +17,7 @@ const PLAYER = {
   dashInvulnMs: 300,
   baseDashCooldown: 1.5,  // seconds
   hitInvulnMs: 800,
-  ramDamage: 15, // dealt to an enemy when its contact damage actually lands on you
+  ramDamage: 20, // dealt to an enemy when its contact damage lands on you — one-shots chasers/minis
   driftBuildRadius: 170,  // must be this close to an enemy while drifting
   maxMultiplier: 8,
   turnRate: 14, // rad/s toward the aim — smooths pause-resume snaps; fast enough to be invisible in normal play
