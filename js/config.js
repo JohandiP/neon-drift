@@ -490,18 +490,22 @@ function drawBackground(scene, themeIndex) {
   const grid = scene.add.tileSprite(cx, cy, GAME_WIDTH, GAME_HEIGHT, 'gridtile_' + idx);
   const bg = scene.add.container(0, 0, [neb, deep, far, near, grid]).setDepth(-10);
 
-  // Scroll the star layers at a 1:4:14 depth ratio (2 / 8 / 28 px/s) — wide
-  // enough that the depth separation is visible, not just measurable.
-  // Off-then-on so scene restarts don't stack handlers; paused scenes stop
-  // emitting update, so the stars freeze with the game.
+  // Scroll the star layers along a drift direction randomized on every
+  // regeneration (new wave group / menu entry), so no two skies flow the same
+  // way. All three layers share the angle — parallax is one camera moving —
+  // and keep their fixed 1:4:14 speed ratio (2 / 8 / 28 px/s), which is what
+  // sells the depth. Off-then-on so scene restarts don't stack handlers;
+  // paused scenes stop emitting update, so the stars freeze with the game.
+  const driftAngle = Math.random() * Math.PI * 2;
+  const dx = Math.cos(driftAngle), dy = Math.sin(driftAngle);
   if (scene.__bgScroll) scene.events.off('update', scene.__bgScroll);
   scene.__bgScroll = (time, delta) => {
-    deep.tilePositionX += 0.002 * delta;
-    deep.tilePositionY += 0.0007 * delta;
-    far.tilePositionX += 0.008 * delta;
-    far.tilePositionY += 0.0027 * delta;
-    near.tilePositionX += 0.028 * delta;
-    near.tilePositionY += 0.0093 * delta;
+    deep.tilePositionX += 0.0021 * dx * delta;
+    deep.tilePositionY += 0.0021 * dy * delta;
+    far.tilePositionX += 0.0085 * dx * delta;
+    far.tilePositionY += 0.0085 * dy * delta;
+    near.tilePositionX += 0.0295 * dx * delta;
+    near.tilePositionY += 0.0295 * dy * delta;
   };
   scene.events.on('update', scene.__bgScroll);
   return bg;
