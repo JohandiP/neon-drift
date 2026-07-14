@@ -173,6 +173,17 @@ class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: this.waveBanner, alpha: 0, delay: 900, duration: 500 });
   }
 
+  // Scale-punch and white-flash the multiplier readout when it climbs.
+  pulseMult() {
+    this.hudMult.setColor('#ffffff');
+    this.tweens.killTweensOf(this.hudMult);
+    this.hudMult.setScale(1.6);
+    this.tweens.add({
+      targets: this.hudMult, scaleX: 1, scaleY: 1, duration: 260, ease: 'Back.easeOut',
+      onComplete: () => this.updateHUD(),
+    });
+  }
+
   // ---------- Waves ----------
 
   startWave(n) {
@@ -617,6 +628,8 @@ class GameScene extends Phaser.Scene {
           this.driftHeat = 0;
           this.multiplier++;
           this.updateHUD();
+          this.pulseMult();
+          AudioFX.play('core');
         }
       }
     } else if (!drifting) {
