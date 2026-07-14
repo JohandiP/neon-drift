@@ -30,7 +30,11 @@ const SaveManager = {
       if (!Array.isArray(merged.unlockedShips) || !merged.unlockedShips.length) {
         merged.unlockedShips = ['viper'];
       }
-      if (!SHIPS[merged.selectedShip]) merged.selectedShip = 'viper';
+      merged.unlockedShips = merged.unlockedShips.filter(k => SHIPS[k]); // drop unknown ships
+      if (!merged.unlockedShips.includes('viper')) merged.unlockedShips.unshift('viper'); // viper is always owned
+      // The selected ship must be one that's actually unlocked — guards against
+      // corrupted or hand-edited saves flying a ship that was never bought.
+      if (!merged.unlockedShips.includes(merged.selectedShip)) merged.selectedShip = 'viper';
       return merged;
     } catch (e) {
       return this.defaults();
